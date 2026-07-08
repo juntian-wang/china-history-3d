@@ -7662,7 +7662,7 @@ function showEventCard(ev) {
   const imgDiv = $('cardImage');
   const shortName = EVENT_IMAGE_MAP[ev.id];
   if (shortName) {
-    imgDiv.innerHTML = `<img src="event_images/${ev.id}_${shortName}.png" alt="${ev.name}">`;
+    imgDiv.innerHTML = `<img src="event_images/${ev.id}_${shortName}.webp" alt="${ev.name}">`;
     imgDiv.style.display = '';
   } else {
     imgDiv.innerHTML = '';
