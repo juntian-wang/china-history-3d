@@ -1,0 +1,19 @@
+# Python 脚本和数据准备工具（非网站运行所需）
+*.py
+__pycache__/
+
+# 备份和输出目录
+backup/
+output/
+
+# 部署配置自身
+deploy/
+Dockerfile
+docker-compose.yml
+.dockerignore
+
+# 临时文件
+*.tmp
+*.log
+.DS_Store
+.workbuddy/

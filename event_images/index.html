@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>初中历史事件插图集 · 107张</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: "KaiTi", "STKaiti", "Microsoft YaHei", serif;
+            background: #f5f1e8;
+            color: #333;
+            padding: 24px;
+        }
+        h1 {
+            text-align: center;
+            font-size: 32px;
+            margin-bottom: 8px;
+            color: #2c241b;
+        }
+        .subtitle {
+            text-align: center;
+            font-size: 16px;
+            color: #666;
+            margin-bottom: 32px;
+        }
+        .stats {
+            text-align: center;
+            margin-bottom: 24px;
+            font-size: 18px;
+            color: #555;
+        }
+        .gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            gap: 20px;
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+        .card {
+            background: #fff;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            transition: transform 0.2s;
+        }
+        .card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+        }
+        .card img {
+            width: 100%;
+            height: auto;
+            display: block;
+            border-bottom: 1px solid #e8e3d8;
+        }
+        .card-info {
+            padding: 12px;
+        }
+        .card-id {
+            font-size: 13px;
+            color: #888;
+            font-family: monospace;
+            margin-bottom: 4px;
+        }
+        .card-title {
+            font-size: 17px;
+            font-weight: bold;
+            color: #2c241b;
+        }
+        .section-title {
+            font-size: 22px;
+            margin: 32px 0 20px;
+            padding-left: 12px;
+            border-left: 4px solid #8b4513;
+            color: #2c241b;
+        }
+    </style>
+</head>
+<body>
+    <h1>初中历史事件插图集</h1>
+    <div class="subtitle">晚明徽州木刻版画风格 · 白描线描 · 768×1152 · 2:3</div>
+    <div class="stats" id="stats">加载中...</div>
+    <div id="gallery"></div>
+
+    <script>
+        const events = [
+  {"id":"7A-02-11","event":"春秋争霸","file":"7A-02-11_春秋争霸.png"},
+  {"id":"7A-02-12","event":"城濮之战","file":"7A-02-12_城濮之战.png"},
+  {"id":"7A-02-13","event":"铁器牛耕出现","file":"7A-02-13_铁器牛耕出现.png"},
+  {"id":"7A-02-14","event":"都江堰修建","file":"7A-02-14_都江堰修建.png"},
+  {"id":"7A-02-15","event":"商鞅变法","file":"7A-02-15_商鞅变法.png"},
+  {"id":"7A-02-16","event":"长平之战","file":"7A-02-16_长平之战.png"},
+  {"id":"7A-02-17","event":"百家争鸣","file":"7A-02-17_百家争鸣.png"},
+  {"id":"7A-02-18","event":"秦灭六国","file":"7A-02-18_秦灭六国.png"},
+  {"id":"7A-03-01","event":"秦朝建立","file":"7A-03-01_秦朝建立.png"},
+  {"id":"7A-03-02","event":"修建万里长城","file":"7A-03-02_修建万里长城.png"},
+  {"id":"7A-03-03","event":"焚书坑儒","file":"7A-03-03_焚书坑儒.png"},
+  {"id":"7A-03-04","event":"陈胜吴广起义","file":"7A-03-04_陈胜吴广起义.png"},
+  {"id":"7A-03-05","event":"巨鹿之战","file":"7A-03-05_巨鹿之战.png"},
+  {"id":"7A-03-06","event":"楚汉之争","file":"7A-03-06_楚汉之争.png"},
+  {"id":"7A-03-07","event":"西汉建立","file":"7A-03-07_西汉建立.png"},
+  {"id":"7A-03-08","event":"文景之治","file":"7A-03-08_文景之治.png"},
+  {"id":"7A-03-09","event":"张骞出使西域","file":"7A-03-09_张骞出使西域.png"},
+  {"id":"7A-03-10","event":"丝绸之路开通","file":"7A-03-10_丝绸之路开通.png"},
+  {"id":"7A-03-11","event":"罢黜百家独尊儒术","file":"7A-03-11_罢黜百家独尊儒术.png"},
+  {"id":"7A-03-12","event":"王莽篡汉","file":"7A-03-12_王莽篡汉.png"},
+  {"id":"7A-03-13","event":"东汉建立","file":"7A-03-13_东汉建立.png"},
+  {"id":"7A-03-14","event":"班超经营西域","file":"7A-03-14_班超经营西域.png"},
+  {"id":"7A-03-15","event":"蔡伦改进造纸术","file":"7A-03-15_蔡伦改进造纸术.png"},
+  {"id":"7A-03-16","event":"张仲景著伤寒杂病论","file":"7A-03-16_张仲景著伤寒杂病论.png"},
+  {"id":"7A-03-17","event":"华佗发明麻沸散","file":"7A-03-17_华佗发明麻沸散.png"},
+  {"id":"7A-03-18","event":"司马迁著史记","file":"7A-03-18_司马迁著史记.png"},
+  {"id":"7A-03-19","event":"黄巾起义","file":"7A-03-19_黄巾起义.png"},
+  {"id":"7A-04-01","event":"官渡之战","file":"7A-04-01_官渡之战.png"},
+  {"id":"7A-04-02","event":"赤壁之战","file":"7A-04-02_赤壁之战.png"},
+  {"id":"7A-04-03","event":"三国鼎立","file":"7A-04-03_三国鼎立.png"},
+  {"id":"7A-04-04","event":"西晋统一","file":"7A-04-04_西晋统一.png"},
+  {"id":"7A-04-05","event":"八王之乱","file":"7A-04-05_八王之乱.png"},
+  {"id":"7A-04-06","event":"东晋建立","file":"7A-04-06_东晋建立.png"},
+  {"id":"7A-04-07","event":"淝水之战","file":"7A-04-07_淝水之战.png"},
+  {"id":"7A-04-08","event":"北魏孝文帝改革","file":"7A-04-08_北魏孝文帝改革.png"},
+  {"id":"7A-04-09","event":"云冈石窟开凿","file":"7A-04-09_云冈石窟开凿.png"},
+  {"id":"7A-04-10","event":"龙门石窟开凿","file":"7A-04-10_龙门石窟开凿.png"},
+  {"id":"7A-04-11","event":"祖冲之计算圆周率","file":"7A-04-11_祖冲之计算圆周率.png"},
+  {"id":"7A-04-12","event":"贾思勰著齐民要术","file":"7A-04-12_贾思勰著齐民要术.png"},
+  {"id":"7B-01-01","event":"隋朝建立","file":"7B-01-01_隋朝建立.png"},
+  {"id":"7B-01-02","event":"隋朝统一全国","file":"7B-01-02_隋朝统一全国.png"},
+  {"id":"7B-01-03","event":"开通大运河","file":"7B-01-03_开通大运河.png"},
+  {"id":"7B-01-04","event":"创立科举制","file":"7B-01-04_创立科举制.png"},
+  {"id":"7B-01-05","event":"唐朝建立","file":"7B-01-05_唐朝建立.png"},
+  {"id":"7B-01-06","event":"玄武门之变","file":"7B-01-06_玄武门之变.png"},
+  {"id":"7B-01-07","event":"贞观之治","file":"7B-01-07_贞观之治.png"},
+  {"id":"7B-01-08","event":"文成公主入藏","file":"7B-01-08_文成公主入藏.png"},
+  {"id":"7B-01-09","event":"武则天称帝","file":"7B-01-09_武则天称帝.png"},
+  {"id":"7B-01-10","event":"开元盛世","file":"7B-01-10_开元盛世.png"},
+  {"id":"7B-01-11","event":"安史之乱","file":"7B-01-11_安史之乱.png"},
+  {"id":"7B-01-12","event":"黄巢起义","file":"7B-01-12_黄巢起义.png"},
+  {"id":"7B-01-13","event":"玄奘西行取经","file":"7B-01-13_玄奘西行取经.png"},
+  {"id":"7B-01-14","event":"鉴真东渡","file":"7B-01-14_鉴真东渡.png"},
+  {"id":"7B-01-15","event":"隋朝创立三省六部制","file":"7B-01-15_隋朝创立三省六部制.png"},
+  {"id":"7B-01-16","event":"唐诗繁荣","file":"7B-01-16_唐诗繁荣.png"},
+  {"id":"7B-02-01","event":"陈桥兵变","file":"7B-02-01_陈桥兵变.png"},
+  {"id":"7B-02-02","event":"杯酒释兵权","file":"7B-02-02_杯酒释兵权.png"},
+  {"id":"7B-02-03","event":"澶渊之盟","file":"7B-02-03_澶渊之盟.png"},
+  {"id":"7B-02-04","event":"交子出现","file":"7B-02-04_交子出现.png"},
+  {"id":"7B-02-05","event":"王安石变法","file":"7B-02-05_王安石变法.png"},
+  {"id":"7B-02-06","event":"靖康之变","file":"7B-02-06_靖康之变.png"},
+  {"id":"7B-02-07","event":"南宋建立","file":"7B-02-07_南宋建立.png"},
+  {"id":"7B-02-08","event":"岳飞抗金","file":"7B-02-08_岳飞抗金.png"},
+  {"id":"7B-02-09","event":"南宋与金和议","file":"7B-02-09_南宋与金和议.png"},
+  {"id":"7B-02-10","event":"成吉思汗统一蒙古","file":"7B-02-10_成吉思汗统一蒙古.png"},
+  {"id":"7B-02-11","event":"忽必烈建立元朝","file":"7B-02-11_忽必烈建立元朝.png"},
+  {"id":"7B-02-12","event":"崖山海战","file":"7B-02-12_崖山海战.png"},
+  {"id":"7B-02-13","event":"行省制度建立","file":"7B-02-13_行省制度建立.png"},
+  {"id":"7B-02-14","event":"宣政院管辖西藏","file":"7B-02-14_宣政院管辖西藏.png"},
+  {"id":"7B-02-15","event":"活字印刷术","file":"7B-02-15_活字印刷术.png"},
+  {"id":"7B-02-16","event":"指南针用于航海","file":"7B-02-16_指南针用于航海.png"},
+  {"id":"7B-03-01","event":"明朝建立","file":"7B-03-01_明朝建立.png"},
+  {"id":"7B-03-02","event":"靖难之役","file":"7B-03-02_靖难之役.png"},
+  {"id":"7B-03-03","event":"明成祖迁都北京","file":"7B-03-03_明成祖迁都北京.png"},
+  {"id":"7B-03-04","event":"郑和下西洋","file":"7B-03-04_郑和下西洋.png"},
+  {"id":"7B-03-05","event":"戚继光抗倭","file":"7B-03-05_戚继光抗倭.png"},
+  {"id":"7B-03-06","event":"葡萄牙占据澳门","file":"7B-03-06_葡萄牙占据澳门.png"},
+  {"id":"7B-03-07","event":"李自成起义","file":"7B-03-07_李自成起义.png"},
+  {"id":"7B-03-08","event":"清军入关","file":"7B-03-08_清军入关.png"},
+  {"id":"7B-03-09","event":"郑成功收复台湾","file":"7B-03-09_郑成功收复台湾.png"},
+  {"id":"7B-03-10","event":"清朝设立台湾府","file":"7B-03-10_清朝设立台湾府.png"},
+  {"id":"7B-03-11","event":"雅克萨之战","file":"7B-03-11_雅克萨之战.png"},
+  {"id":"7B-03-12","event":"中俄尼布楚条约","file":"7B-03-12_中俄尼布楚条约.png"},
+  {"id":"7B-03-13","event":"平定噶尔丹叛乱","file":"7B-03-13_平定噶尔丹叛乱.png"},
+  {"id":"7B-03-14","event":"驻藏大臣设立","file":"7B-03-14_驻藏大臣设立.png"},
+  {"id":"7B-03-15","event":"军机处设立","file":"7B-03-15_军机处设立.png"},
+  {"id":"7B-03-16","event":"平定大小和卓叛乱","file":"7B-03-16_平定大小和卓叛乱.png"},
+  {"id":"7B-03-17","event":"闭关锁国政策","file":"7B-03-17_闭关锁国政策.png"},
+  {"id":"7B-03-18","event":"红楼梦等四大名著","file":"7B-03-18_红楼梦等四大名著.png"},
+  {"id":"7B-03-19","event":"李时珍著本草纲目","file":"7B-03-19_李时珍著本草纲目.png"},
+  {"id":"7B-03-20","event":"宋应星著天工开物","file":"7B-03-20_宋应星著天工开物.png"},
+  {"id":"8A-01-01","event":"虎门销烟","file":"8A-01-01_虎门销烟.png"},
+  {"id":"8A-01-02","event":"鸦片战争","file":"8A-01-02_鸦片战争.png"},
+  {"id":"8A-01-03","event":"签订南京条约","file":"8A-01-03_签订南京条约.png"},
+  {"id":"8A-01-04","event":"第二次鸦片战争","file":"8A-01-04_第二次鸦片战争.png"},
+  {"id":"8A-01-05","event":"火烧圆明园","file":"8A-01-05_火烧圆明园.png"},
+  {"id":"8A-01-06","event":"沙俄侵占中国领土","file":"8A-01-06_沙俄侵占中国领土.png"},
+  {"id":"8A-01-07","event":"太平天国运动","file":"8A-01-07_太平天国运动.png"},
+  {"id":"8A-01-08","event":"阿古柏侵占新疆","file":"8A-01-08_阿古柏侵占新疆.png"},
+  {"id":"8A-01-09","event":"甲午中日战争","file":"8A-01-09_甲午中日战争.png"},
+  {"id":"8A-01-10","event":"签订马关条约","file":"8A-01-10_签订马关条约.png"},
+  {"id":"8A-01-11","event":"戊戌变法","file":"8A-01-11_戊戌变法.png"},
+  {"id":"8A-01-12","event":"义和团运动","file":"8A-01-12_义和团运动.png"},
+  {"id":"8A-01-13","event":"八国联军侵华","file":"8A-01-13_八国联军侵华.png"},
+  {"id":"8A-01-14","event":"签订辛丑条约","file":"8A-01-14_签订辛丑条约.png"},
+  {"id":"8A-02-01","event":"洋务运动","file":"8A-02-01_洋务运动.png"},
+  {"id":"8A-02-02","event":"辛亥革命","file":"8A-02-02_辛亥革命.png"}
+];
+
+        const gallery = document.getElementById('gallery');
+        const stats = document.getElementById('stats');
+        stats.textContent = `共 ${events.length} 张图片，按学期分组展示`;
+
+        let currentSection = '';
+        events.forEach(ev => {
+            const prefix = ev.id.split('-').slice(0,2).join('-');
+            const sectionName = {
+                '7A-02': '七年级上册 · 早期国家与社会变革',
+                '7A-03': '七年级上册 · 秦汉统一多民族国家',
+                '7A-04': '七年级上册 · 三国两晋南北朝',
+                '7B-01': '七年级下册 · 隋唐',
+                '7B-02': '七年级下册 · 宋元',
+                '7B-03': '七年级下册 · 明清',
+                '8A-01': '八年级上册 · 近代史（一）',
+                '8A-02': '八年级上册 · 近代史（二）'
+            }[prefix] || prefix;
+
+            if (sectionName !== currentSection) {
+                currentSection = sectionName;
+                const title = document.createElement('h2');
+                title.className = 'section-title';
+                title.textContent = sectionName;
+                gallery.appendChild(title);
+            }
+
+            const card = document.createElement('div');
+            card.className = 'card';
+            card.innerHTML = `
+                <img src="${ev.file}" alt="${ev.event}" loading="lazy">
+                <div class="card-info">
+                    <div class="card-id">${ev.id}</div>
+                    <div class="card-title">${ev.event}</div>
+                </div>
+            `;
+            gallery.appendChild(card);
+        });
+    </script>
+</body>
+</html>

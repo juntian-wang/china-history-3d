@@ -1,0 +1,17 @@
+services:
+  history-map:
+    build: .
+    container_name: history-map
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    volumes:
+      # 挂载方式（可选）：修改文件后无需重新构建镜像
+      # - ./maplibre_3d_history.html:/usr/share/nginx/html/maplibre_3d_history.html
+      # - ./event_images:/usr/share/nginx/html/event_images
+      # - ./website:/usr/share/nginx/html/website
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost/"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
