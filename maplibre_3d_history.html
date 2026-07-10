@@ -173,8 +173,11 @@
     padding: 24px 20px 12px;
   }
   #eraBar {
-    display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px;
+    display: flex; gap: 6px; margin-bottom: 12px;
+    overflow-x: auto; overflow-y: hidden; white-space: nowrap;
+    -webkit-overflow-scrolling: touch; scrollbar-width: none;
   }
+  #eraBar::-webkit-scrollbar { display: none; }
   #eraBar button {
     padding: 6px 14px; border: 1px solid var(--line);
     background: rgba(34,31,25,.6); color: var(--ink-2);
