@@ -642,7 +642,9 @@
     "新疆",
     "台湾",
     "香港",
-    "澳门"
+    "澳门",
+    "Mongolia",
+    "Dem. Rep. Korea"
   ],
   "palette": {
     "dark": {
@@ -2160,7 +2162,8 @@
             "湖南",
             "江西",
             "浙江",
-            "福建"
+            "福建",
+            "Dem. Rep. Korea"
           ],
           "capital": "长安",
           "capCoord": [
@@ -2328,7 +2331,8 @@
             "江西",
             "浙江",
             "福建",
-            "云南北部"
+            "云南北部",
+            "Dem. Rep. Korea"
           ],
           "capital": "长安",
           "capCoord": [
@@ -4230,7 +4234,8 @@
             "宁夏",
             "新疆",
             "香港",
-            "澳门"
+            "澳门",
+            "Dem. Rep. Korea"
           ]
         },
         {
@@ -6130,7 +6135,8 @@
             "西藏",
             "云南",
             "贵州",
-            "青海"
+            "青海",
+            "Mongolia"
           ],
           "capital": "大都",
           "capCoord": [
@@ -6200,7 +6206,8 @@
             "青海",
             "宁夏",
             "香港",
-            "澳门"
+            "澳门",
+            "Mongolia"
           ]
         },
         {
@@ -6605,7 +6612,8 @@
             "辽宁",
             "吉林",
             "黑龙江",
-            "内蒙古"
+            "内蒙古",
+            "Mongolia"
           ],
           "capital": "北京",
           "capCoord": [
@@ -6698,7 +6706,8 @@
             "吉林",
             "黑龙江",
             "内蒙古",
-            "西藏"
+            "西藏",
+            "Mongolia"
           ],
           "capital": "北京",
           "capCoord": [
@@ -6790,7 +6799,8 @@
             "新疆",
             "台湾",
             "香港",
-            "澳门"
+            "澳门",
+            "Mongolia"
           ]
         }
       ]
@@ -6831,7 +6841,8 @@
             "新疆",
             "青海",
             "宁夏",
-            "台湾"
+            "台湾",
+            "Mongolia"
           ],
           "capital": "北京",
           "capCoord": [
@@ -7267,6 +7278,76 @@ let eventsOn = true;
 let pinnedProv = null;
 let hoveredProv = null;
 
+/* ---- 关联地区简介（不属疆域但有历史关系） ---- */
+const RELATED = {
+  "Korea": {
+    zh: "朝鲜半岛南部",
+    eras: {
+      "西汉": "西汉时期，朝鲜半岛南部为「三韩」部落（马韩、辰韩、弁韩），与汉朝有朝贡贸易往来，汉文化通过乐浪郡传播至半岛南部。",
+      "唐": "唐与新罗（统一朝鲜半岛南部）关系密切，新罗派遣大量留学生入唐学习，仿唐制建立政治制度，佛教、儒学、典章制度广泛传入。",
+      "元": "高丽王朝虽为元朝附属，但保持了相当程度的自治。元朝设征东行省，名义上管辖高丽，实际上是联姻与朝贡关系。",
+      "明": "李氏朝鲜取代高丽后，成为明朝最忠实的藩属国，使用明朝年号、奉行儒家礼制，中朝边境相对和平稳定。",
+      "清": "朝鲜为清朝藩属国，维持朝贡关系。清末甲午战争（1894年）后朝鲜脱离清朝控制，逐渐被日本吞并。"
+    }
+  },
+  "Japan": {
+    zh: "日本",
+    eras: {
+      "东汉": "东汉光武帝赐「汉委奴国王」金印给日本倭奴国使者，中日官方交往始于此，金印于1784年在福冈志贺岛发现。",
+      "唐": "日本从630年起先后派遣19次遣唐使来华学习唐朝典章制度、佛教、建筑和文字，回国后推动大化改新，深刻影响了日本文化。",
+      "明": "明朝与日本进行勘合贸易，但明中期倭寇（日本武士与海盗）频繁骚扰中国东南沿海，戚继光率军抗倭。万历年间明军援朝抗倭。",
+      "清": "明治维新后日本崛起，1894年发动甲午战争击败清朝，侵占台湾及澎湖列岛，改变了东亚国际格局。"
+    }
+  },
+  "Vietnam": {
+    zh: "越南",
+    eras: {
+      "秦": "秦始皇平定岭南后设象郡，管辖今越南北部地区，中原文化开始传入。",
+      "西汉": "汉武帝灭南越国后设交趾、九真、日南三郡，越南北部正式纳入汉朝郡县体系，史称「北属时期」开端。",
+      "东汉": "东汉时期交趾郡持续发展，中原移民和汉文化不断南传。东汉末交趾太守士燮治理有方，使交趾成为避乱之地和学术中心。",
+      "唐": "唐朝在越南北部设安南都护府，与唐朝境内其他州府实行相同的行政管理制度，科举制度也在安南推行。",
+      "明": "明成祖朱棣派兵攻占安南，设交趾布政使司（1407-1427年），直接管辖约20年，后因当地反抗激烈而撤兵。",
+      "清": "清朝与阮朝保持藩属关系，越南使用清朝年号、定期朝贡。清末中法战争（1884年）后越南沦为法国殖民地。"
+    }
+  },
+  "Myanmar": {
+    zh: "缅甸",
+    eras: {
+      "元": "元朝多次派兵征讨蒲甘王国，曾设缅中行省，但控制时间较短，更多是朝贡关系。",
+      "明": "明朝在云南边境设立六慰（土司机构），管辖部分缅北地区。缅甸东吁王朝与明朝保持朝贡关系。",
+      "清": "清朝与缅甸贡榜王朝发生清缅战争（1765-1769年），后缅甸成为清朝藩属国，定期遣使朝贡。"
+    }
+  },
+  "Thailand": {
+    zh: "泰国",
+    eras: {
+      "元": "元朝与暹罗（素可泰王朝）建立朝贡关系，双方贸易往来频繁。",
+      "明": "明朝称泰国地区为暹罗，与阿瑜陀耶王朝保持密切朝贡贸易关系。郑和下西洋船队曾多次途经暹罗。",
+      "清": "清朝与暹罗（曼谷王朝）维持朝贡贸易，大米贸易尤为兴盛。"
+    }
+  },
+  "Cambodia": {
+    zh: "柬埔寨",
+    eras: {
+      "明": "明朝称柬埔寨为真腊，双方保持朝贡关系。郑和下西洋船队曾到访真腊。《真腊风土记》详细记载了当时的风俗。"
+    }
+  },
+  "Indonesia": {
+    zh: "印度尼西亚",
+    eras: {
+      "元": "元朝曾派兵远征爪哇（1292年），虽未能长期占据，但加强了对南洋地区的了解。",
+      "明": "郑和七下西洋多次到访爪哇、苏门答腊等地，建立贸易关系和外交往来，满者伯夷等国遣使来华朝贡。"
+    }
+  },
+  "Malaysia": {
+    zh: "马来西亚",
+    eras: {
+      "明": "满剌加（马六甲）与明朝关系极为密切，其国王曾率妃子大臣亲访明朝。郑和船队以满剌加为重要中转基地，满剌加长期向明朝朝贡。",
+      "清": "清朝延续与南洋地区的贸易往来，但对外政策趋于保守，与马来半岛各邦的官方往来减少。"
+    }
+  }
+};
+
 const yearText = y => y < 0 ? `公元前${-y}年` : `${y}年`;
 
 /* ============================ 颜色工具 ============================ */
@@ -7355,8 +7436,13 @@ function animateColors(to, instant) {
     const eased = f * f * (3 - 2 * f);
     ALL.forEach(p => { colState[p] = lerp3(from[p], to[p], eased); });
     // 隔帧更新 setPaintProperty，减少样式重算开销
-    if (map.getLayer('china-fill') && (frameCount++ % 2 === 0 || f >= 1)) {
-      map.setPaintProperty('china-fill', 'fill-color', fillExpr(colState));
+    if (frameCount++ % 2 === 0 || f >= 1) {
+      if (map.getLayer('china-fill')) {
+        map.setPaintProperty('china-fill', 'fill-color', fillExpr(colState));
+      }
+      if (map.getLayer('ext-fill')) {
+        map.setPaintProperty('ext-fill', 'fill-color', fillExpr(colState));
+      }
     }
     if (f < 1) animId = requestAnimationFrame(frame);
   }
@@ -7917,9 +8003,40 @@ function onMapLoad() {
   map.addSource('world-china', { type: 'geojson', data: GEO });
 
   // 世界国家不再覆盖深色填充，直接透出卫星底图
+  // 境外领土由 ext-fill 图层单独渲染
 
   // 中国省份填充（按政权着色）
   colState = targetColors(0);
+
+  // 境外历史领土填充（利用世界国家边界）
+  map.addLayer({
+    id: 'ext-fill', type: 'fill', source: 'world-china',
+    filter: ['in', ['get', 'name'], ['literal', ['Mongolia', 'Dem. Rep. Korea']]],
+    paint: {
+      'fill-color': fillExpr(colState),
+      'fill-opacity': 0.45,
+      'fill-antialias': false
+    }
+  });
+
+  // 关联地区（透明层，仅用于点击查看简介）
+  map.addLayer({
+    id: 'related-fill', type: 'fill', source: 'world-china',
+    filter: ['in', ['get', 'name'], ['literal', ['Korea', 'Japan', 'Vietnam', 'Myanmar', 'Thailand', 'Cambodia', 'Indonesia', 'Malaysia']]],
+    paint: {
+      'fill-color': 'rgba(0,0,0,0)',
+      'fill-opacity': 0,
+      'fill-antialias': false
+    }
+  });
+
+  // 关联地区国界线
+  map.addLayer({
+    id: 'related-border', type: 'line', source: 'world-china',
+    filter: ['in', ['get', 'name'], ['literal', ['Korea', 'Japan', 'Vietnam', 'Myanmar', 'Thailand', 'Cambodia', 'Indonesia', 'Malaysia']]],
+    paint: { 'line-color': 'rgba(232,220,192,0.22)', 'line-width': 0.5 }
+  });
+
   map.addLayer({
     id: 'china-fill', type: 'fill', source: 'world-china',
     filter: ['==', ['get', '_isChina'], true],
@@ -8072,6 +8189,22 @@ function onMapLoad() {
     hoveredProv = null;
     map.setFilter('hover-line', ['==', ['get', 'name'], '']);
   });
+  // 境外领土悬停高亮
+  map.on('mousemove', 'ext-fill', e => {
+    if (e.features.length > 0) {
+      const name = e.features[0].properties.name;
+      map.getCanvas().style.cursor = 'pointer';
+      if (hoveredProv !== name) {
+        hoveredProv = name;
+        map.setFilter('hover-line', ['==', ['get', 'name'], name]);
+      }
+    }
+  });
+  map.on('mouseleave', 'ext-fill', () => {
+    map.getCanvas().style.cursor = '';
+    hoveredProv = null;
+    map.setFilter('hover-line', ['==', ['get', 'name'], '']);
+  });
   map.on('click', 'regime-label', e => {
     if (e.features.length > 0) {
       const f = e.features[0];
@@ -8079,6 +8212,66 @@ function onMapLoad() {
       const firstProv = provs.split('、').map(normProv).find(p => ALL.includes(p));
       flyToFeature(e);
       if (firstProv) { pinnedProv = firstProv; showCard(firstProv, e.lngLat); }
+    }
+  });
+
+  // 外部领土点击
+  map.on('click', 'ext-fill', e => {
+    if (e.features.length > 0) {
+      const name = e.features[0].properties.name;
+      pinnedProv = name;
+      flyToFeature(e);
+      showCard(name, e.lngLat);
+    }
+  });
+
+  // 关联地区（不属疆域，仅显示简介）
+  function showRelatedCard(name) {
+    const info = RELATED[name];
+    if (!info) return;
+    // 找到当前断面对应的时期简介
+    const snap = SNAPSHOTS[cur];
+    let eraKey = snap.era;
+    // 取最匹配的朝代描述
+    const eraDesc = info.eras[eraKey] || info.eras[Object.keys(info.eras)[0]];
+    window._cardMode = 'related';
+    $('cardTitle').textContent = info.zh;
+    $('cardTitle').style.color = '#b3a888';
+    $('cardContent').innerHTML =
+      `<div class="meta">${snap.era}（${yearText(snap.year)}）· ${snap.label}</div>` +
+      `<div class="desc" style="line-height:1.7;">${eraDesc}</div>`;
+    $('cardImage').style.display = 'none';
+    $('card').classList.add('big');
+    map.once('moveend', () => {
+      const center = map.getCenter();
+      const pt = map.project([center.lng, center.lat]);
+      positionCard(pt);
+      $('card').classList.remove('hidden');
+    });
+  }
+  // 关联地区鼠标移入：改变光标 + 高亮边界
+  map.on('mousemove', 'related-fill', e => {
+    if (e.features.length > 0) {
+      const name = e.features[0].properties.name;
+      map.getCanvas().style.cursor = 'pointer';
+      if (hoveredProv !== name) {
+        hoveredProv = name;
+        map.setFilter('hover-line', ['==', ['get', 'name'], name]);
+      }
+    }
+  });
+  map.on('mouseleave', 'related-fill', () => {
+    map.getCanvas().style.cursor = '';
+    hoveredProv = null;
+    map.setFilter('hover-line', ['==', ['get', 'name'], '']);
+  });
+  // 关联地区点击
+  map.on('click', 'related-fill', e => {
+    if (e.features.length > 0) {
+      const name = e.features[0].properties.name;
+      const center = e.lngLat;
+      map.flyTo({ center: [center.lng, center.lat], zoom: Math.max(map.getZoom(), 4), duration: 1200 });
+      showRelatedCard(name);
     }
   });
 
@@ -8102,7 +8295,7 @@ function onMapLoad() {
 
   // 点击地图空白处关闭弹窗（事件标记已 stopPropagation，不会被触发）
   map.on('click', e => {
-    const f = map.queryRenderedFeatures(e.point, { layers: ['china-fill', 'regime-label', 'city-circle'] });
+    const f = map.queryRenderedFeatures(e.point, { layers: ['china-fill', 'regime-label', 'city-circle', 'ext-fill', 'related-fill'] });
     if (f.length === 0) hideCard();
   });
 
