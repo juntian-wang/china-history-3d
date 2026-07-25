@@ -149,9 +149,10 @@
   /* ---------- 信息卡片 ---------- */
   #card {
     position: absolute; z-index: 10;
-    width: 290px; background: var(--bg-raised);
+    width: 290px; background: rgba(42,32,20,.50);
     border: 1px solid var(--line); border-radius: 8px;
-    padding: 16px; backdrop-filter: blur(12px);
+    padding: 16px; backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
     box-shadow: 0 4px 20px var(--shadow);
     transition: opacity .25s, transform .3s ease;
   }
@@ -498,7 +499,9 @@
   #eventList {
     position: absolute; left: 22px; top: 56px; bottom: 150px;
     width: 180px; z-index: 10;
-    background: rgba(42,32,20,.70);
+    background: rgba(42,32,20,.50);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
     border: 1px solid rgba(200,160,80,.35);
     border-radius: 8px;
     box-shadow: 0 2px 12px rgba(0,0,0,.25);
@@ -7652,14 +7655,14 @@ function showPoemPopup(p) {
   const overlay = document.createElement('div');
   overlay.id = 'poem-overlay';
   overlay.innerHTML =
-    '<div style="position:fixed;inset:0;z-index:999;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.55)">' +
-    '<div style="position:relative;background:rgba(42,32,20,.96);border:1px solid rgba(200,160,80,.4);border-radius:12px;padding:24px 28px;max-width:440px;width:90vw;max-height:75vh;overflow-y:auto;box-shadow:0 12px 48px rgba(0,0,0,.7);line-height:1.6;color:var(--ink)">' +
-    '<button onclick="this.closest(\'#poem-overlay\').remove()" style="position:absolute;top:8px;right:12px;background:none;border:none;color:var(--ink-3);font-size:22px;cursor:pointer">&times;</button>' +
-    '<div style="margin-bottom:4px">' +
-    '<div style="font-size:16px;font-weight:700;font-family:var(--serif);color:var(--accent);letter-spacing:.04em">' + p.t + '</div>' +
-    '<div style="font-size:12px;color:var(--ink-3);margin-bottom:8px">' + p.a + ' · ' + p.d + ' · ' + p.g + '</div>' +
-    '<div style="font-size:14px;color:var(--ink);line-height:1.8;white-space:pre-line">' + (p.f || p.l) + '</div></div>' +
-    '</div></div>';
+    '<div style="position:fixed;inset:0;z-index:999;display:flex;align-items:center;justify-content:center;background:transparent">' +
+    '<div style="position:relative;background:rgba(42,32,20,.50);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);border-radius:12px;padding:24px 28px;max-width:75vw;min-width:180px;max-height:80vh;overflow:auto;box-shadow:0 2px 12px rgba(0,0,0,.25);color:var(--ink)">' +
+    '<button onclick="this.closest(\'#poem-overlay\').remove()" style="position:absolute;top:8px;right:12px;background:none;border:none;color:var(--ink-3);font-size:22px;cursor:pointer;z-index:1">&times;</button>' +
+    '<div style="display:flex;flex-direction:row-reverse;align-items:flex-start;gap:14px;height:55vh;min-height:180px">' +
+      '<div style="writing-mode:vertical-rl;font-size:22px;font-weight:700;color:var(--accent);font-family:var(--serif);letter-spacing:.1em;text-shadow:0 0 12px rgba(200,160,80,.25)">' + p.t + '</div>' +
+      '<div style="writing-mode:vertical-rl;font-size:13px;color:var(--ink-3);font-family:var(--serif);letter-spacing:.06em">' + p.a + ' · ' + p.d + ' · ' + p.g + '</div>' +
+      '<div style="writing-mode:vertical-rl;font-size:16px;color:var(--ink);line-height:2.4;letter-spacing:.08em;white-space:pre-line;font-family:var(--serif);text-shadow:0 1px 4px rgba(0,0,0,.9)">' + (p.f || p.l) + '</div>' +
+    '</div></div></div>';
   document.body.appendChild(overlay);
   overlay.querySelector('div').addEventListener('click', e => {
     if (e.target === e.currentTarget) overlay.remove();
