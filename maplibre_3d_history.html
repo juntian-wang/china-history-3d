@@ -3,8 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>中国历史疆域3D地形图</title>
+<title>中国历史疆域地图</title>
 <link rel="stylesheet" href="maplibre-gl.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Long+Cang&display=swap" rel="stylesheet">
 <style>
   :root {
     --bg: #2a2014;
@@ -18,6 +21,7 @@
     --river: #6a8fa8;
     --shadow: rgba(0, 0, 0, .55);
     --serif: "STKaiti", "KaiTi", "楷体", "Noto Serif SC", "Songti SC", "STSong", "SimSun", Georgia, serif;
+    --poem-font: "Long Cang", "STKaiti", "KaiTi", "楷体", serif;
     --sans: "PingFang SC", "Helvetica Neue", sans-serif;
   }
   * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -42,13 +46,43 @@
   }
   header .sub { font-size: 11px; color: var(--ink-3); white-space: nowrap; }
   .spacer { flex: 1; }
+  /* ---------- 模式切换按钮 ---------- */
+  #modeToggle { display: flex; gap: 4px; pointer-events: auto; margin-right: 46px; }
+  .mode-btn {
+    padding: 5px 12px; border-radius: 14px; border: 1px solid rgba(255,255,255,.15);
+    background: rgba(255,255,255,.06); color: var(--ink-3);
+    font-size: 12px; font-family: var(--sans); cursor: pointer;
+    transition: all .2s; white-space: nowrap;
+  }
+  .mode-btn:hover { background: rgba(255,255,255,.12); color: var(--ink); }
+  .mode-btn.active { background: var(--accent); color: #2a2014; border-color: var(--accent); }
+  /* ---------- 诗词 popup ---------- */
+  .maplibregl-popup { z-index: 100 !important; }
+  .maplibregl-popup-content {
+    position: relative; z-index: 1000;
+    background: rgba(42,32,20,.95) !important;
+    border: 1px solid rgba(200,160,80,.4) !important;
+    border-radius: 10px !important;
+    padding: 14px 18px !important;
+    box-shadow: 0 6px 24px rgba(0,0,0,.6) !important;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    font-family: var(--serif) !important;
+    color: var(--ink) !important;
+    line-height: 1.6;
+  }
+  .maplibregl-popup-tip { display: none !important; }
+  .maplibregl-popup-close-button {
+    color: var(--ink-3) !important; font-size: 18px !important;
+    padding: 4px 8px !important; right: 2px !important; top: 2px !important;
+  }
+  .maplibregl-popup-close-button:hover { color: var(--ink) !important; }
 
   /* ---------- 朝代横幅 ---------- */
   #timeline {
     position: absolute; bottom: 0; left: 0; right: 0; z-index: 10;
-    background: linear-gradient(0deg, rgba(25,23,19,.95) 30%, rgba(25,23,19,0) 100%);
+    background: none;
     padding: 24px 20px 12px;
-    position: relative;
   }
   #dynastyBanner {
     position: absolute; top: 16px; left: 50%; transform: translateX(-50%);
@@ -166,10 +200,58 @@
   }
   #cardClose:hover { color: var(--ink); }
 
+
+
+
+  /* ---------- 搜索框 ---------- */
+  #searchBox {
+    position: relative; pointer-events: auto;
+    margin-left: 18px; width: 260px; flex-shrink: 0;
+  }
+  #searchInput {
+    width: 100%; height: 32px; padding: 0 12px;
+    background: rgba(40,30,18,.82); color: var(--ink);
+    border: 1px solid var(--line); border-radius: 16px;
+    font-size: 13px; font-family: var(--sans); outline: none;
+    backdrop-filter: blur(8px);
+    box-shadow: 0 2px 10px rgba(0,0,0,.35);
+    transition: border-color .2s;
+  }
+  #searchInput::placeholder { color: var(--ink-3); }
+  #searchInput:focus { border-color: var(--accent); }
+  #searchResults {
+    position: absolute; top: 38px; left: 0; right: 0; z-index: 30;
+    max-height: 340px; overflow-y: auto;
+    background: rgba(34,26,15,.96); border: 1px solid var(--line);
+    border-radius: 10px; padding: 4px;
+    box-shadow: 0 8px 28px rgba(0,0,0,.5);
+    backdrop-filter: blur(10px);
+  }
+  #searchResults.hidden { display: none; }
+  .sr-item {
+    display: flex; align-items: baseline; gap: 8px;
+    padding: 7px 10px; border-radius: 6px; cursor: pointer;
+  }
+  .sr-item:hover, .sr-item.active { background: rgba(187,138,41,.18); }
+  .sr-tag {
+    flex-shrink: 0; font-size: 10px; padding: 1px 6px; border-radius: 8px;
+    color: #2a2014; font-family: var(--sans);
+  }
+  .sr-tag.event { background: #d9865b; }
+  .sr-tag.regime { background: #c8a050; }
+  .sr-tag.capital { background: #6a8fa8; }
+  .sr-tag.poem { background: #b88a44; }
+  .sr-label { flex: 1; font-size: 13px; color: var(--ink); font-family: var(--serif); }
+  .sr-sub { flex-shrink: 0; font-size: 11px; color: var(--ink-3); }
+  .sr-empty { padding: 10px; font-size: 12px; color: var(--ink-3); text-align: center; }
+
+
+
+
   /* ---------- 底部时间轴 ---------- */
   #timeline {
     position: absolute; bottom: 0; left: 0; right: 0; z-index: 10;
-    background: linear-gradient(0deg, rgba(25,23,19,.95) 30%, rgba(25,23,19,0) 100%);
+    background: none;
     padding: 24px 20px 12px;
   }
   #eraBar {
@@ -303,6 +385,8 @@
     #cardImage img { width: 140px; height: 210px; }
     #credit { font-size: 10px; }
     #eraBar button { font-size: 11px; padding: 5px 10px; border-radius: 12px; }
+    #modeToggle { gap: 2px; }
+    .mode-btn { font-size: 11px; padding: 4px 8px; }
     #dynastyBanner { top: 10px; padding: 6px 20px 10px; border-radius: 12px; }
     #dynastyBanner .era-name { font-size: 20px; }
     #dynastyBanner .era-year { font-size: 11px; }
@@ -311,6 +395,8 @@
     .event-list-item { font-size: 13px; padding: 6px 10px; }
     .event-list-era { font-size: 14px; }
     #eventListToggle { width: 20px; height: 20px; font-size: 10px; }
+    #searchBox { margin-left: 8px; width: 130px; }
+    #searchInput { height: 28px; font-size: 12px; }
   }
 
   /* ---------- 竖排文字层 ---------- */
@@ -325,7 +411,6 @@
     text-orientation: upright;
     user-select: none; -webkit-user-select: none;
     letter-spacing: 0.15em;
-    will-change: transform;
     transition: opacity .5s ease;
     color: #fff;
     font-weight: 700;
@@ -342,10 +427,11 @@
   .vl-city { font-size: 11px; }
 
   /* ---------- 历史事件 DOM 标记层（在文字层之上） ---------- */
-  #eventLayer {
+  #eventLayer, #poemLayer {
     position: absolute; inset: 0; z-index: 6;
     pointer-events: none; overflow: hidden;
   }
+  #poemLayer { z-index: 7; display: none; }
   .event-pin {
     position: absolute; left: 0; top: 0;
     pointer-events: auto; cursor: pointer;
@@ -365,6 +451,48 @@
     white-space: nowrap; margin-top: 2px;
     pointer-events: none;
   }
+  /* ---------- 诗词竖排文字 ---------- */
+  @keyframes poem-fadein {
+    0% { opacity: 0; }
+    100% { opacity: 1; }
+  }
+  @keyframes poem-float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-6px); }
+  }
+  .vl-poem {
+    position: absolute; left: 0; top: 0; z-index: 7;
+    writing-mode: vertical-rl;
+    font-size: 20px; font-weight: 700; font-family: var(--poem-font);
+    color: #f5e88a; letter-spacing: .06em;
+    background: none;
+    padding: 0;
+    text-shadow:
+      0 0 4px rgba(232,200,74,.8),
+      0 0 12px rgba(232,200,74,.5),
+      0 0 28px rgba(232,200,74,.2);
+    pointer-events: auto; cursor: pointer;
+    white-space: nowrap; user-select: none;
+    line-height: 1.4;
+    opacity: 0;
+    animation: poem-fadein .8s ease-out forwards;
+    /* 定位由 positionAllText 的 transform 控制，动画在内部 span 上 */
+  }
+  .vl-poem > span {
+    display: inline-block;
+    will-change: transform;
+    animation: poem-float 3.4s ease-in-out infinite;
+  }
+  .vl-poem:hover > span {
+    animation-play-state: paused;
+    color: #fff5b0;
+    text-shadow:
+      0 0 6px rgba(232,200,74,1),
+      0 0 16px rgba(232,200,74,.8),
+      0 0 32px rgba(232,200,74,.5),
+      0 0 56px rgba(232,200,74,.25);
+  }
+  .vl-poem:hover > span .vl-poem-author { color: #e8d070; }
 
   /* ---------- 左侧朝代事件列表 ---------- */
   #eventList {
@@ -542,6 +670,7 @@
 <div id="map"></div>
 <div id="textLayer"></div>
 <div id="eventLayer"></div>
+<div id="poemLayer"></div>
 <div id="eventList">
   <div class="event-list-header">
     <div class="event-list-header-text">
@@ -566,11 +695,20 @@
 
 <header>
   <div class="title-block">
-    <h1>中国历史疆域3D地形图</h1>
+    <h1>中国历史疆域地图</h1>
     <div id="credit">由 壮壮爱学习 制作</div>
   </div>
+  <div id="searchBox">
+    <input type="search" id="searchInput" placeholder="搜索事件 / 朝代 / 都城 / 人物…" autocomplete="off">
+    <div id="searchResults" class="hidden"></div>
+  </div>
   <span class="spacer"></span>
+  <div id="modeToggle">
+    <button class="mode-btn active" data-mode="history">疆域</button>
+    <button class="mode-btn" data-mode="poem">诗词</button>
+  </div>
 </header>
+
 
 <div id="dynastyBanner">
   <div class="era-name"></div>
@@ -7399,7 +7537,333 @@ function processData() {
     lat: e.lat, lng: e.lng, description: e.desc
   }));
   window._eventBySnapshot = buildEventMap();
+  buildSearchIndex();
 }
+
+// ======== 诗词数据（部编版小一~九下完整版）========
+const POEM_DATA = [{"c": "鹳雀楼", "lat": 34.85, "lng": 110.45, "t": "登鹳雀楼", "a": "王之涣", "d": "唐", "l": "欲穷千里目，更上一层楼。", "g": "小-2", "e": "唐", "f": "白日依山尽，黄河入海流。\n欲穷千里目，更上一层楼。"}, {"c": "庐山", "lat": 29.55, "lng": 115.98, "t": "望庐山瀑布", "a": "李白", "d": "唐", "l": "飞流直下三千尺，疑是银河落九天。", "g": "小-3", "e": "唐", "f": "日照香炉生紫烟，遥看瀑布挂前川。\n飞流直下三千尺，疑是银河落九天。"}, {"c": "白帝城", "lat": 31.04, "lng": 109.52, "t": "早发白帝城", "a": "李白", "d": "唐", "l": "朝辞白帝彩云间，千里江陵一日还。", "g": "小-3", "e": "唐", "f": "朝辞白帝彩云间，千里江陵一日还。\n两岸猿声啼不住，轻舟已过万重山。"}, {"c": "天门山", "lat": 31.08, "lng": 118.5, "t": "望天门山", "a": "李白", "d": "唐", "l": "天门中断楚江开，碧水东流至此回。", "g": "小-3", "e": "唐", "f": "天门中断楚江开，碧水东流至此回。\n两岸青山相对出，孤帆一片日边来。"}, {"c": "敬亭山", "lat": 30.95, "lng": 118.72, "t": "独坐敬亭山", "a": "李白", "d": "唐", "l": "众鸟高飞尽，孤云独去闲。", "g": "小-3", "e": "唐", "f": "众鸟高飞尽，孤云独去闲。\n相看两不厌，只有敬亭山。"}, {"c": "玉门关", "lat": 40.35, "lng": 93.85, "t": "凉州词", "a": "王之涣", "d": "唐", "l": "羌笛何须怨杨柳，春风不度玉门关。", "g": "小-4", "e": "唐", "f": "葡萄美酒夜光杯，欲饮琵琶马上催。\n醉卧沙场君莫笑，古来征战几人回？"}, {"c": "凉州", "lat": 37.9, "lng": 102.6, "t": "凉州词", "a": "王翰", "d": "唐", "l": "葡萄美酒夜光杯，欲饮琵琶马上催。", "g": "小-4", "e": "唐", "f": "葡萄美酒夜光杯，欲饮琵琶马上催。\n醉卧沙场君莫笑，古来征战几人回？"}, {"c": "阴山", "lat": 41.2, "lng": 111.6, "t": "出塞", "a": "王昌龄", "d": "唐", "l": "但使龙城飞将在，不教胡马度阴山。", "g": "小-4", "e": "唐", "f": "秦时明月汉时关，万里长征人未还。\n但使龙城飞将在，不教胡马度阴山。"}, {"c": "姑苏", "lat": 31.3, "lng": 120.62, "t": "枫桥夜泊", "a": "张继", "d": "唐", "l": "姑苏城外寒山寺，夜半钟声到客船。", "g": "小-4", "e": "唐", "f": "月落乌啼霜满天，江枫渔火对愁眠。\n姑苏城外寒山寺，夜半钟声到客船。"}, {"c": "西塞山", "lat": 30.89, "lng": 120.09, "t": "渔歌子", "a": "张志和", "d": "唐", "l": "西塞山前白鹭飞，桃花流水鳜鱼肥。", "g": "小-4", "e": "唐", "f": "西塞山前白鹭飞，桃花流水鳜鱼肥。\n青箬笠，绿蓑衣，斜风细雨不须归。"}, {"c": "杭州", "lat": 30.25, "lng": 120.17, "t": "饮湖上初晴后雨", "a": "苏轼", "d": "北宋", "l": "欲把西湖比西子，淡妆浓抹总相宜。", "g": "小-3", "e": "北宋", "f": "水光潋滟晴方好，山色空蒙雨亦奇。\n欲把西湖比西子，淡妆浓抹总相宜。"}, {"c": "庐山", "lat": 29.55, "lng": 115.98, "t": "题西林壁", "a": "苏轼", "d": "北宋", "l": "不识庐山真面目，只缘身在此山中。", "g": "小-4", "e": "北宋", "f": "横看成岭侧成峰，远近高低各不同。\n不识庐山真面目，只缘身在此山中。"}, {"c": "滁州", "lat": 32.3, "lng": 118.32, "t": "滁州西涧", "a": "韦应物", "d": "唐", "l": "春潮带雨晚来急，野渡无人舟自横。", "g": "小-4", "e": "唐", "f": "独怜幽草涧边生，上有黄鹂深树鸣。\n春潮带雨晚来急，野渡无人舟自横。"}, {"c": "成都", "lat": 30.67, "lng": 104.07, "t": "绝句", "a": "杜甫", "d": "唐", "l": "两个黄鹂鸣翠柳，一行白鹭上青天。", "g": "小-3", "e": "唐", "f": "两个黄鹂鸣翠柳，一行白鹭上青天。\n窗含西岭千秋雪，门泊东吴万里船。"}, {"c": "洞庭湖", "lat": 29.2, "lng": 113.0, "t": "望洞庭", "a": "刘禹锡", "d": "唐", "l": "遥望洞庭山水翠，白银盘里一青螺。", "g": "小-4", "e": "唐", "f": "湖光秋月两相和，潭面无风镜未磨。\n遥望洞庭山水翠，白银盘里一青螺。"}, {"c": "杭州", "lat": 30.25, "lng": 120.17, "t": "忆江南·江南忆", "a": "白居易", "d": "唐", "l": "江南忆，最忆是杭州。山寺月中寻桂子。", "g": "小-3", "e": "唐", "f": "江南忆，最忆是杭州。山寺月中寻桂子，郡亭枕上看潮头。何日更重游？"}, {"c": "敕勒川", "lat": 41.0, "lng": 111.5, "t": "敕勒歌", "a": "北朝民歌", "d": "北朝", "l": "天苍苍，野茫茫，风吹草低见牛羊。", "g": "小-2", "e": "南北朝", "f": "敕勒川，阴山下。天似穹庐，笼盖四野。\n天苍苍，野茫茫，风吹草低见牛羊。"}, {"c": "瓜洲", "lat": 32.25, "lng": 119.43, "t": "泊船瓜洲", "a": "王安石", "d": "北宋", "l": "春风又绿江南岸，明月何时照我还。", "g": "小-5", "e": "北宋", "f": "京口瓜洲一水间，钟山只隔数重山。\n春风又绿江南岸，明月何时照我还。"}, {"c": "山海关", "lat": 40.0, "lng": 119.75, "t": "长相思", "a": "纳兰性德", "d": "清", "l": "山一程，水一程，身向榆关那畔行。", "g": "小-5", "e": "清", "f": "山一程，水一程，身向榆关那畔行，夜深千帐灯。\n风一更，雪一更，聒碎乡心梦不成，故园无此声。"}, {"c": "渭城", "lat": 34.33, "lng": 108.73, "t": "送元二使安西", "a": "王维", "d": "唐", "l": "劝君更尽一杯酒，西出阳关无故人。", "g": "小-6", "e": "唐", "f": "渭城朝雨浥轻尘，客舍青青柳色新。\n劝君更尽一杯酒，西出阳关无故人。"}, {"c": "襄阳", "lat": 32.0, "lng": 112.1, "t": "闻官军收河南河北", "a": "杜甫", "d": "唐", "l": "即从巴峡穿巫峡，便下襄阳向洛阳。", "g": "小-6", "e": "唐", "link": "洛阳", "f": "剑外忽传收蓟北，初闻涕泪满衣裳。\n却看妻子愁何在，漫卷诗书喜欲狂。\n白日放歌须纵酒，青春作伴好还乡。\n即从巴峡穿巫峡，便下襄阳向洛阳。"}, {"c": "洛阳", "lat": 34.62, "lng": 112.45, "t": "闻官军收河南河北", "a": "杜甫", "d": "唐", "l": "即从巴峡穿巫峡，便下襄阳向洛阳。", "g": "小-6", "e": "唐", "f": "剑外忽传收蓟北，初闻涕泪满衣裳。\n却看妻子愁何在，漫卷诗书喜欲狂。\n白日放歌须纵酒，青春作伴好还乡。\n即从巴峡穿巫峡，便下襄阳向洛阳。"}, {"c": "杭州", "lat": 30.25, "lng": 120.17, "t": "晓出净慈寺送林子方", "a": "杨万里", "d": "南宋", "l": "接天莲叶无穷碧，映日荷花别样红。", "g": "小-6", "e": "南宋", "f": "毕竟西湖六月中，风光不与四时同。\n接天莲叶无穷碧，映日荷花别样红。"}, {"c": "杭州", "lat": 30.25, "lng": 120.17, "t": "六月二十七日望湖楼醉书", "a": "苏轼", "d": "北宋", "l": "黑云翻墨未遮山，白雨跳珠乱入船。", "g": "小-6", "e": "北宋", "f": "黑云翻墨未遮山，白雨跳珠乱入船。\n卷地风来忽吹散，望湖楼下水如天。"}, {"c": "碣石", "lat": 39.7, "lng": 118.9, "t": "观沧海", "a": "曹操", "d": "东汉末", "l": "东临碣石，以观沧海。", "g": "七上", "e": "东汉", "f": "东临碣石，以观沧海。\n水何澹澹，山岛竦峙。\n树木丛生，百草丰茂。\n秋风萧瑟，洪波涌起。\n日月之行，若出其中。\n星汉灿烂，若出其里。\n幸甚至哉，歌以咏志。"}, {"c": "北固山", "lat": 32.23, "lng": 119.5, "t": "次北固山下", "a": "王湾", "d": "唐", "l": "客路青山外，行舟绿水前。", "g": "七上", "e": "唐", "f": "客路青山外，行舟绿水前。\n潮平两岸阔，风正一帆悬。\n海日生残夜，江春入旧年。\n乡书何处达？归雁洛阳边。"}, {"c": "龙标", "lat": 27.5, "lng": 109.7, "t": "闻王昌龄左迁龙标遥有此寄", "a": "李白", "d": "唐", "l": "我寄愁心与明月，随君直到夜郎西。", "g": "七上", "e": "唐", "f": "杨花落尽子规啼，闻道龙标过五溪。\n我寄愁心与明月，随君直到夜郎西。"}, {"c": "蓟", "lat": 39.9, "lng": 116.4, "t": "登幽州台歌", "a": "陈子昂", "d": "唐", "l": "前不见古人，后不见来者。", "g": "七上", "e": "唐", "f": "前不见古人，后不见来者。\n念天地之悠悠，独怆然而涕下。"}, {"c": "泰山", "lat": 36.25, "lng": 117.1, "t": "望岳", "a": "杜甫", "d": "唐", "l": "会当凌绝顶，一览众山小。", "g": "七上", "e": "唐", "f": "岱宗夫如何？齐鲁青未了。\n造化钟神秀，阴阳割昏晓。\n荡胸生曾云，决眦入归鸟。\n会当凌绝顶，一览众山小。"}, {"c": "杭州", "lat": 30.25, "lng": 120.17, "t": "登飞来峰", "a": "王安石", "d": "北宋", "l": "不畏浮云遮望眼，自缘身在最高层。", "g": "七上", "e": "北宋", "f": "飞来山上千寻塔，闻说鸡鸣见日升。\n不畏浮云遮望眼，自缘身在最高层。"}, {"c": "绍兴", "lat": 29.99, "lng": 120.58, "t": "游山西村", "a": "陆游", "d": "南宋", "l": "山重水复疑无路，柳暗花明又一村。", "g": "七上", "e": "南宋", "f": "莫笑农家腊酒浑，丰年留客足鸡豚。\n山重水复疑无路，柳暗花明又一村。\n箫鼓追随春社近，衣冠简朴古风存。\n从今若许闲乘月，拄杖无时夜叩门。"}, {"c": "潼关", "lat": 34.6, "lng": 110.3, "t": "潼关", "a": "谭嗣同", "d": "清", "l": "河流大野犹嫌束，山入潼关不解平。", "g": "七上", "e": "清", "f": "终古高云簇此城，秋风吹散马蹄声。\n河流大野犹嫌束，山入潼关不解平。"}, {"c": "洛阳", "lat": 34.62, "lng": 112.45, "t": "春夜洛城闻笛", "a": "李白", "d": "唐", "l": "谁家玉笛暗飞声，散入春风满洛城。", "g": "七下", "e": "唐", "f": "谁家玉笛暗飞声，散入春风满洛城。\n此夜曲中闻折柳，何人不起故园情。"}, {"c": "长安", "lat": 34.25, "lng": 108.9, "t": "逢入京使", "a": "岑参", "d": "唐", "l": "故园东望路漫漫，双袖龙钟泪不干。", "g": "七下", "e": "唐", "f": "故园东望路漫漫，双袖龙钟泪不干。\n马上相逢无纸笔，凭君传语报平安。"}, {"c": "南京", "lat": 32.06, "lng": 118.79, "t": "泊秦淮", "a": "杜牧", "d": "唐", "l": "烟笼寒水月笼沙，夜泊秦淮近酒家。", "g": "七下", "e": "唐", "f": "烟笼寒水月笼沙，夜泊秦淮近酒家。\n商女不知亡国恨，隔江犹唱后庭花。"}, {"c": "武汉", "lat": 30.58, "lng": 114.28, "t": "黄鹤楼", "a": "崔颢", "d": "唐", "l": "昔人已乘黄鹤去，此地空余黄鹤楼。", "g": "八上", "e": "唐", "f": "昔人已乘黄鹤去，此地空余黄鹤楼。\n黄鹤一去不复返，白云千载空悠悠。\n晴川历历汉阳树，芳草萋萋鹦鹉洲。\n日暮乡关何处是？烟波江上使人愁。"}, {"c": "凉州", "lat": 37.9, "lng": 102.6, "t": "使至塞上", "a": "王维", "d": "唐", "l": "大漠孤烟直，长河落日圆。", "g": "八上", "e": "唐", "f": "单车欲问边，属国过居延。\n征蓬出汉塞，归雁入胡天。\n大漠孤烟直，长河落日圆。\n萧关逢候骑，都护在燕然。"}, {"c": "荆门", "lat": 30.9, "lng": 112.2, "t": "渡荆门送别", "a": "李白", "d": "唐", "l": "山随平野尽，江入大荒流。", "g": "八上", "e": "唐", "f": "渡远荆门外，来从楚国游。\n山随平野尽，江入大荒流。\n月下飞天镜，云生结海楼。\n仍怜故乡水，万里送行舟。"}, {"c": "杭州", "lat": 30.25, "lng": 120.17, "t": "钱塘湖春行", "a": "白居易", "d": "唐", "l": "乱花渐欲迷人眼，浅草才能没马蹄。", "g": "八上", "e": "唐", "f": "孤山寺北贾亭西，水面初平云脚低。\n几处早莺争暖树，谁家新燕啄春泥。\n乱花渐欲迷人眼，浅草才能没马蹄。\n最爱湖东行不足，绿杨阴里白沙堤。"}, {"c": "长安", "lat": 34.25, "lng": 108.9, "t": "春望", "a": "杜甫", "d": "唐", "l": "国破山河在，城春草木深。", "g": "八上", "e": "唐", "f": "国破山河在，城春草木深。\n感时花溅泪，恨别鸟惊心。\n烽火连三月，家书抵万金。\n白头搔更短，浑欲不胜簪。"}, {"c": "雁门", "lat": 39.0, "lng": 112.9, "t": "雁门太守行", "a": "李贺", "d": "唐", "l": "黑云压城城欲摧，甲光向日金鳞开。", "g": "八上", "e": "唐", "f": "黑云压城城欲摧，甲光向日金鳞开。\n角声满天秋色里，塞上燕脂凝夜紫。\n半卷红旗临易水，霜重鼓寒声不起。\n报君黄金台上意，提携玉龙为君死。"}, {"c": "赤壁", "lat": 29.72, "lng": 113.9, "t": "赤壁", "a": "杜牧", "d": "唐", "l": "东风不与周郎便，铜雀春深锁二乔。", "g": "八上", "e": "唐", "f": "折戟沉沙铁未销，自将磨洗认前朝。\n东风不与周郎便，铜雀春深锁二乔。"}, {"c": "南京", "lat": 32.06, "lng": 118.79, "t": "相见欢·金陵", "a": "朱敦儒", "d": "宋", "l": "金陵城上西楼，倚清秋。万里夕阳垂地，大江流。", "g": "八上", "e": "北宋", "f": "金陵城上西楼，倚清秋。万里夕阳垂地，大江流。\n中原乱，簪缨散，几时收？试倩悲风吹泪，过扬州。"}, {"c": "蜀州", "lat": 30.7, "lng": 103.8, "t": "送杜少府之任蜀州", "a": "王勃", "d": "唐", "l": "城阙辅三秦，风烟望五津。", "g": "八下", "e": "唐", "f": "城阙辅三秦，风烟望五津。\n与君离别意，同是宦游人。\n海内存知己，天涯若比邻。\n无为在歧路，儿女共沾巾。"}, {"c": "洞庭湖", "lat": 29.2, "lng": 113.0, "t": "望洞庭湖赠张丞相", "a": "孟浩然", "d": "唐", "l": "气蒸云梦泽，波撼岳阳城。", "g": "八下", "e": "唐", "f": "八月湖水平，涵虚混太清。\n气蒸云梦泽，波撼岳阳城。\n欲济无舟楫，端居耻圣明。\n坐观垂钓者，徒有羡鱼情。"}, {"c": "成都", "lat": 30.67, "lng": 104.07, "t": "茅屋为秋风所破歌", "a": "杜甫", "d": "唐", "l": "安得广厦千万间，大庇天下寒士俱欢颜！", "g": "八下", "e": "唐", "f": "八月秋高风怒号，卷我屋上三重茅。茅飞渡江洒江郊，高者挂罥长林梢，下者飘转沉塘坳。\n南村群童欺我老无力，忍能对面为盗贼。公然抱茅入竹去，唇焦口燥呼不得，归来倚杖自叹息。\n俄顷风定云墨色，秋天漠漠向昏黑。布衾多年冷似铁，娇儿恶卧踏里裂。床头屋漏无干处，雨脚如麻未断绝。自经丧乱少睡眠，长夜沾湿何由彻！\n安得广厦千万间，大庇天下寒士俱欢颜！风雨不动安如山。呜呼！何时眼前突兀见此屋，吾庐独破受冻死亦足！"}, {"c": "常熟", "lat": 31.65, "lng": 120.75, "t": "题破山寺后禅院", "a": "常建", "d": "唐", "l": "曲径通幽处，禅房花木深。", "g": "八下", "e": "唐", "f": "清晨入古寺，初日照高林。\n曲径通幽处，禅房花木深。\n山光悦鸟性，潭影空人心。\n万籁此都寂，但余钟磬音。"}, {"c": "黄州", "lat": 30.44, "lng": 114.87, "t": "卜算子·黄州定慧院", "a": "苏轼", "d": "北宋", "l": "拣尽寒枝不肯栖，寂寞沙洲冷。", "g": "八下", "e": "北宋", "f": "缺月挂疏桐，漏断人初静。谁见幽人独往来，缥缈孤鸿影。\n惊起却回头，有恨无人省。拣尽寒枝不肯栖，寂寞沙洲冷。"}, {"c": "扬州", "lat": 32.39, "lng": 119.41, "t": "酬乐天扬州初逢席上见赠", "a": "刘禹锡", "d": "唐", "l": "沉舟侧畔千帆过，病树前头万木春。", "g": "九上", "e": "唐", "f": "巴山楚水凄凉地，二十三年弃置身。\n怀旧空吟闻笛赋，到乡翻似烂柯人。\n沉舟侧畔千帆过，病树前头万木春。\n今日听君歌一曲，暂凭杯酒长精神。"}, {"c": "长沙", "lat": 28.2, "lng": 112.97, "t": "长沙过贾谊宅", "a": "刘长卿", "d": "唐", "l": "三年谪宦此栖迟，万古惟留楚客悲。", "g": "九上", "e": "唐", "f": "三年谪宦此栖迟，万古惟留楚客悲。\n秋草独寻人去后，寒林空见日斜时。\n汉文有道恩犹薄，湘水无情吊岂知。\n寂寂江山摇落处，怜君何事到天涯。"}, {"c": "蓝田", "lat": 34.15, "lng": 109.33, "t": "左迁至蓝关示侄孙湘", "a": "韩愈", "d": "唐", "l": "云横秦岭家何在？雪拥蓝关马不前。", "g": "九上", "e": "唐", "f": "一封朝奏九重天，夕贬潮州路八千。\n欲为圣明除弊事，肯将衰朽惜残年！\n云横秦岭家何在？雪拥蓝关马不前。\n知汝远来应有意，好收吾骨瘴江边。"}, {"c": "商山", "lat": 33.9, "lng": 109.9, "t": "商山早行", "a": "温庭筠", "d": "唐", "l": "鸡声茅店月，人迹板桥霜。", "g": "九上", "e": "唐", "f": "晨起动征铎，客行悲故乡。\n鸡声茅店月，人迹板桥霜。\n槲叶落山路，枳花明驿墙。\n因思杜陵梦，凫雁满回塘。"}, {"c": "咸阳", "lat": 34.35, "lng": 108.72, "t": "咸阳城东楼", "a": "许浑", "d": "唐", "l": "溪云初起日沉阁，山雨欲来风满楼。", "g": "九上", "e": "唐", "f": "一上高城万里愁，蒹葭杨柳似汀洲。\n溪云初起日沉阁，山雨欲来风满楼。\n鸟下绿芜秦苑夕，蝉鸣黄叶汉宫秋。\n行人莫问当年事，故国东来渭水流。"}, {"c": "轮台", "lat": 41.8, "lng": 84.2, "t": "白雪歌送武判官归京", "a": "岑参", "d": "唐", "l": "忽如一夜春风来，千树万树梨花开。", "g": "九下", "e": "唐", "f": "北风卷地白草折，胡天八月即飞雪。\n忽如一夜春风来，千树万树梨花开。\n散入珠帘湿罗幕，狐裘不暖锦衾薄。\n将军角弓不得控，都护铁衣冷难着。\n瀚海阑干百丈冰，愁云惨淡万里凝。\n中军置酒饮归客，胡琴琵琶与羌笛。\n纷纷暮雪下辕门，风掣红旗冻不翻。\n轮台东门送君去，去时雪满天山路。\n山回路转不见君，雪上空留马行处。"}, {"c": "京口", "lat": 32.2, "lng": 119.46, "t": "南乡子·登京口北固亭", "a": "辛弃疾", "d": "南宋", "l": "何处望神州？满眼风光北固楼。", "g": "九下", "e": "南宋", "f": "何处望神州？满眼风光北固楼。千古兴亡多少事？悠悠。不尽长江滚滚流。\n年少万兜鍪，坐断东南战未休。天下英雄谁敌手？曹刘。生子当如孙仲谋。"}, {"c": "零丁洋", "lat": 22.3, "lng": 113.8, "t": "过零丁洋", "a": "文天祥", "d": "南宋", "l": "人生自古谁无死？留取丹心照汗青。", "g": "九下", "e": "南宋", "f": "辛苦遭逢起一经，干戈寥落四周星。\n山河破碎风飘絮，身世浮沉雨打萍。\n惶恐滩头说惶恐，零丁洋里叹零丁。\n人生自古谁无死？留取丹心照汗青。"}, {"c": "潼关", "lat": 34.6, "lng": 110.3, "t": "山坡羊·潼关怀古", "a": "张养浩", "d": "元", "l": "峰峦如聚，波涛如怒，山河表里潼关路。", "g": "九下", "e": "元", "f": "峰峦如聚，波涛如怒，山河表里潼关路。望西都，意踌躇。\n伤心秦汉经行处，宫阙万间都做了土。兴，百姓苦；亡，百姓苦。"}, {"c": "骊山", "lat": 34.36, "lng": 109.21, "t": "山坡羊·骊山怀古", "a": "张养浩", "d": "元", "l": "骊山四顾，阿房一炬，当时奢侈今何处。", "g": "九下", "e": "元", "f": "骊山四顾，阿房一炬，当时奢侈今何处？只见草萧疏，水萦纡。\n至今遗恨迷烟树。列国周齐秦汉楚。赢，都变做了土；输，都变做了土。"}, {"c": "岳阳", "lat": 29.37, "lng": 113.11, "t": "岳阳楼记", "a": "范仲淹", "d": "北宋", "l": "先天下之忧而忧，后天下之乐而乐。", "g": "九下", "e": "北宋", "f": "庆历四年春，滕子京谪守巴陵郡。越明年，政通人和，百废具兴，乃重修岳阳楼，增其旧制，刻唐贤今人诗赋于其上，属予作文以记之。\n予观夫巴陵胜状，在洞庭一湖。衔远山，吞长江，浩浩汤汤，横无际涯，朝晖夕阴，气象万千，此则岳阳楼之大观也，前人之述备矣。然则北通巫峡，南极潇湘，迁客骚人，多会于此，览物之情，得无异乎？\n嗟夫！予尝求古仁人之心，或异二者之为，何哉？不以物喜，不以己悲，居庙堂之高则忧其民，处江湖之远则忧其君。是进亦忧，退亦忧。然则何时而乐耶？其必曰「先天下之忧而忧，后天下之乐而乐」乎！噫！微斯人，吾谁与归？"}, {"c": "滁州", "lat": 32.3, "lng": 118.32, "t": "醉翁亭记", "a": "欧阳修", "d": "北宋", "l": "醉翁之意不在酒，在乎山水之间也。", "g": "八下", "e": "北宋", "f": "环滁皆山也。其西南诸峰，林壑尤美。望之蔚然而深秀者，琅琊也。山行六七里，渐闻水声潺潺，而泻出于两峰之间者，酿泉也。峰回路转，有亭翼然临于泉上者，醉翁亭也。\n醉翁之意不在酒，在乎山水之间也。山水之乐，得之心而寓之酒也。\n已而夕阳在山，人影散乱，太守归而宾客从也。树林阴翳，鸣声上下，游人去而禽鸟乐也。然而禽鸟知山林之乐，而不知人之乐；人知从太守游而乐，而不知太守之乐其乐也。醉能同其乐，醒能述以文者，太守也。太守谓谁？庐陵欧阳修也。"}, {"c": "永州", "lat": 26.42, "lng": 111.6, "t": "小石潭记", "a": "柳宗元", "d": "唐", "l": "潭中鱼可百许头，皆若空游无所依。", "g": "八下", "e": "唐", "f": "从小丘西行百二十步，隔篁竹，闻水声，如鸣珮环，心乐之。伐竹取道，下见小潭，水尤清冽。全石以为底，近岸，卷石底以出，为坻，为屿，为嵁，为岩。青树翠蔓，蒙络摇缀，参差披拂。\n潭中鱼可百许头，皆若空游无所依，日光下澈，影布石上。佁然不动，俶尔远逝，往来翕忽，似与游者相乐。"}, {"c": "三峡", "lat": 31.0, "lng": 109.5, "t": "三峡", "a": "郦道元", "d": "北魏", "l": "两岸连山，略无阙处。重岩叠嶂，隐天蔽日。", "g": "八上", "e": "南北朝", "f": "自三峡七百里中，两岸连山，略无阙处。重岩叠嶂，隐天蔽日，自非亭午夜分，不见曦月。\n至于夏水襄陵，沿溯阻绝。或王命急宣，有时朝发白帝，暮到江陵，其间千二百里，虽乘奔御风，不以疾也。\n春冬之时，则素湍绿潭，回清倒影。绝巘多生怪柏，悬泉瀑布，飞漱其间，清荣峻茂，良多趣味。\n每至晴初霜旦，林寒涧肃，常有高猿长啸，属引凄异，空谷传响，哀转久绝。故渔者歌曰：「巴东三峡巫峡长，猿鸣三声泪沾裳。」"}, {"c": "黄州", "lat": 30.44, "lng": 114.87, "t": "记承天寺夜游", "a": "苏轼", "d": "北宋", "l": "庭下如积水空明，水中藻荇交横，盖竹柏影也。", "g": "八上", "e": "北宋", "f": "元丰六年十月十二日夜，解衣欲睡，月色入户，欣然起行。念无与为乐者，遂至承天寺寻张怀民。怀民亦未寝，相与步于中庭。\n庭下如积水空明，水中藻、荇交横，盖竹柏影也。\n何夜无月？何处无竹柏？但少闲人如吾两人者耳。"}, {"c": "桃花源", "lat": 29.0, "lng": 111.5, "t": "桃花源记", "a": "陶渊明", "d": "东晋", "l": "土地平旷，屋舍俨然，有良田美池桑竹之属。", "g": "八下", "e": "东晋", "f": "晋太元中，武陵人捕鱼为业。缘溪行，忘路之远近。忽逢桃花林，夹岸数百步，中无杂树，芳草鲜美，落英缤纷。渔人甚异之，复前行，欲穷其林。\n林尽水源，便得一山，山有小口，仿佛若有光。便舍船，从口入。初极狭，才通人。复行数十步，豁然开朗。土地平旷，屋舍俨然，有良田、美池、桑竹之属。阡陌交通，鸡犬相闻。其中往来种作，男女衣着，悉如外人。黄发垂髫，并怡然自乐。"}, {"c": "富春江", "lat": 29.8, "lng": 119.9, "t": "与朱元思书", "a": "吴均", "d": "南朝梁", "l": "风烟俱净，天山共色。从流飘荡，任意东西。", "g": "八上", "e": "南北朝", "f": "风烟俱净，天山共色。从流飘荡，任意东西。自富阳至桐庐一百许里，奇山异水，天下独绝。\n水皆缥碧，千丈见底。游鱼细石，直视无碍。急湍甚箭，猛浪若奔。\n夹岸高山，皆生寒树，负势竞上，互相轩邈，争高直指，千百成峰。泉水激石，泠泠作响；好鸟相鸣，嘤嘤成韵。蝉则千转不穷，猿则百叫无绝。"}, {"c": "杭州", "lat": 30.25, "lng": 120.17, "t": "湖心亭看雪", "a": "张岱", "d": "明末清初", "l": "雾凇沆砀，天与云与山与水，上下一白。", "g": "九上", "e": "明", "f": "崇祯五年十二月，余住西湖。大雪三日，湖中人鸟声俱绝。是日更定矣，余拏一小舟，拥毳衣炉火，独往湖心亭看雪。雾凇沆砀，天与云与山与水，上下一白。湖上影子，惟长堤一痕、湖心亭一点、与余舟一芥、舟中人两三粒而已。"}, {"c": "南阳", "lat": 33.0, "lng": 112.5, "t": "出师表", "a": "诸葛亮", "d": "三国", "l": "臣本布衣，躬耕于南阳。", "g": "九下", "e": "三国", "f": "臣亮言：先帝创业未半而中道崩殂，今天下三分，益州疲弊，此诚危急存亡之秋也。然侍卫之臣不懈于内，忠志之士忘身于外者，盖追先帝之殊遇，欲报之于陛下也。诚宜开张圣听，以光先帝遗德，恢弘志士之气，不宜妄自菲薄，引喻失义，以塞忠谏之路也。\n臣本布衣，躬耕于南阳，苟全性命于乱世，不求闻达于诸侯。先帝不以臣卑鄙，猥自枉屈，三顾臣于草庐之中，咨臣以当世之事，由是感激，遂许先帝以驱驰。"}, {"c": "隆中", "lat": 32.01, "lng": 112.12, "t": "出师表·隆中", "a": "诸葛亮", "d": "三国", "l": "三顾臣于草庐之中，咨臣以当世之事。", "g": "九下", "e": "三国", "f": "臣本布衣，躬耕于南阳，苟全性命于乱世，不求闻达于诸侯。先帝不以臣卑鄙，猥自枉屈，三顾臣于草庐之中，咨臣以当世之事，由是感激，遂许先帝以驱驰。"}, {"c": "长勺", "lat": 36.1, "lng": 117.5, "t": "曹刿论战", "a": "左丘明", "d": "春秋", "l": "一鼓作气，再而衰，三而竭。", "g": "九下", "e": "春秋", "f": "十年春，齐师伐我。公将战，曹刿请见。其乡人曰：「肉食者谋之，又何间焉？」刿曰：「肉食者鄙，未能远谋。」乃入见。问：「何以战？」公曰：「衣食所安，弗敢专也，必以分人。」对曰：「小惠未遍，民弗从也。」公曰：「牺牲玉帛，弗敢加也，必以信。」对曰：「小信未孚，神弗福也。」公曰：「小大之狱，虽不能察，必以情。」对曰：「忠之属也。可以一战。战则请从。」\n公与之乘，战于长勺。公将鼓之。刿曰：「未可。」齐人三鼓。刿曰：「可矣。」齐师败绩。公将驰之。刿曰：「未可。」下视其辙，登轼而望之，曰：「可矣。」遂逐齐师。\n既克，公问其故。对曰：「夫战，勇气也。一鼓作气，再而衰，三而竭。彼竭我盈，故克之。夫大国，难测也，惧有伏焉。吾视其辙乱，望其旗靡，故逐之。」"}];
+
+// ======== 诗词工具函数 ========
+// 按 era 索引：era → items[]
+let POEM_INDEX = {};
+function buildPoemIndex() {
+  POEM_INDEX = {};
+  for (const p of POEM_DATA) {
+    const e = p.e || '';
+    if (!POEM_INDEX[e]) POEM_INDEX[e] = [];
+    POEM_INDEX[e].push(p);
+  }
+}
+buildPoemIndex();
+
+// 刷新诗词标记
+let poemTextEls = [];
+function updatePoems(pi) {
+  // 从 textEls 和 DOM 中移除旧的诗词标签
+  poemTextEls.forEach(el => el.remove());
+  textEls = textEls.filter(el => el.dataset.type !== 'poem');
+  poemTextEls = [];
+  if (window._mode !== 'poem') return;
+  const snap = SNAPSHOTS[pi];
+  if (!snap) return;
+  const era = snap.era;
+  const items = POEM_INDEX[era] || [];
+  // 按城市去重合并
+  const cityMap = {};
+  for (const p of items) {
+    const k = p.c;
+    if (!cityMap[k]) cityMap[k] = { c: p.c, lat: p.lat, lng: p.lng, poems: [] };
+    cityMap[k].poems.push(p);
+  }
+  for (const key in cityMap) {
+    const cp = cityMap[key];
+    cp.poems.forEach((p, i) => {
+      const el = createTextEl(cp.lng, cp.lat, '', 'vl-poem');
+      // 内层 span 承载动画，避免与定位用的 transform 冲突
+      const inner = document.createElement('span');
+      inner.textContent = p.t;
+      // 随机延迟让各诗词浮动步调错开
+      inner.style.animationDelay = (Math.random() * 3.4).toFixed(2) + 's';
+      el.dataset.type = 'poem';
+      el.style.cursor = 'pointer';
+      if (i > 0) el.style.marginLeft = (i * 18) + 'px';
+      el.addEventListener('click', (e) => {
+        e.stopPropagation();
+        map.flyTo({ center: [cp.lng, cp.lat], zoom: 5, pitch: PITCH_3D, duration: 1200 });
+        $('viewToggleBtn').textContent = '俯视';
+        showPoemPopup(p);
+      });
+      el.appendChild(inner);
+      poemTextEls.push(el);
+    });
+  }
+  // 更新左侧列表
+  updatePoemList(items);
+}
+
+function updatePoemList(items) {
+  const panel = $('eventList');
+  if (!panel) return;
+  const body = panel.querySelector('.event-list-body');
+  const eraEl = panel.querySelector('.event-list-era');
+  const countEl = panel.querySelector('.event-list-count');
+  if (!body || !eraEl || !countEl) return;
+  const snap = SNAPSHOTS[cur];
+  eraEl.textContent = snap ? snap.era : '';
+  const cityMap = {};
+  for (const p of items) {
+    if (!cityMap[p.c]) cityMap[p.c] = [];
+    cityMap[p.c].push(p);
+  }
+  const entries = Object.entries(cityMap);
+  countEl.textContent = items.length + ' 首诗词';
+  if (!entries.length) {
+    body.innerHTML = '<div class="event-list-empty">本时期暂无相关诗词</div>';
+    return;
+  }
+  body.innerHTML = '';
+  entries.forEach(([city, poems]) => {
+    poems.forEach(p => {
+      const item = document.createElement('div');
+      item.className = 'event-list-item';
+      item.textContent = p.t + ' · ' + p.a;
+      item.addEventListener('click', () => {
+        map.flyTo({ center: [p.lng, p.lat], zoom: 5, pitch: PITCH_3D, duration: 1200 });
+        $('viewToggleBtn').textContent = '俯视';
+        showPoemPopup(p);
+      });
+      body.appendChild(item);
+    });
+  });
+}
+
+// 诗词 popup
+let _poemPopup = null;
+function showPoemPopup(p) {
+  if (_poemPopup) {
+    _poemPopup.remove();
+    _poemPopup = null;
+    if (document.getElementById('poem-overlay')) {
+      document.getElementById('poem-overlay').remove();
+      return;
+    }
+  }
+  // 用浮层替代 MapLibre Popup，居中显示，可滚动
+  const overlay = document.createElement('div');
+  overlay.id = 'poem-overlay';
+  overlay.innerHTML =
+    '<div style="position:fixed;inset:0;z-index:999;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.55)">' +
+    '<div style="position:relative;background:rgba(42,32,20,.96);border:1px solid rgba(200,160,80,.4);border-radius:12px;padding:24px 28px;max-width:440px;width:90vw;max-height:75vh;overflow-y:auto;box-shadow:0 12px 48px rgba(0,0,0,.7);line-height:1.6;color:var(--ink)">' +
+    '<button onclick="this.closest(\'#poem-overlay\').remove()" style="position:absolute;top:8px;right:12px;background:none;border:none;color:var(--ink-3);font-size:22px;cursor:pointer">&times;</button>' +
+    '<div style="margin-bottom:4px">' +
+    '<div style="font-size:16px;font-weight:700;font-family:var(--serif);color:var(--accent);letter-spacing:.04em">' + p.t + '</div>' +
+    '<div style="font-size:12px;color:var(--ink-3);margin-bottom:8px">' + p.a + ' · ' + p.d + ' · ' + p.g + '</div>' +
+    '<div style="font-size:14px;color:var(--ink);line-height:1.8;white-space:pre-line">' + (p.f || p.l) + '</div></div>' +
+    '</div></div>';
+  document.body.appendChild(overlay);
+  overlay.querySelector('div').addEventListener('click', e => {
+    if (e.target === e.currentTarget) overlay.remove();
+  });
+}
+
+// 模式切换
+function switchMode(mode) {
+  window._mode = mode;
+  const els = document.querySelectorAll('.mode-btn');
+  els.forEach(el => el.classList.toggle('active', el.dataset.mode === mode));
+  const isPoem = mode === 'poem';
+  // 切换图层显示
+  $('eventLayer').style.display = isPoem ? 'none' : '';
+  // 诗词模式下隐藏城市圆点/名称图层
+  try {
+    map.setLayoutProperty('city-circle', 'visibility', isPoem ? 'none' : 'visible');
+    map.setLayoutProperty('city-label', 'visibility', isPoem ? 'none' : 'visible');
+  } catch(e) {}
+  // 诗词模式下只保留诗词和城市名称，城市半透明，其他全部隐藏
+  textEls.forEach(el => {
+    if (isPoem) {
+      if (el.dataset.type === 'poem') {
+        el.style.display = '';
+        el.style.opacity = '';
+      } else if (el.dataset.type === 'city') {
+        el.style.display = '';
+        el.style.opacity = '0.5';
+      } else {
+        el.style.display = 'none';
+        el.style.opacity = '';
+      }
+    } else {
+      el.style.display = '';
+      el.style.opacity = '';
+    }
+  });
+  // 隐藏/显示事件卡片
+  if (isPoem && !$('card').classList.contains('hidden')) hideCard();
+  // 切到诗词模式时，复位到默认视角并开启3D
+  if (isPoem) {
+    map.flyTo({ center: HOME.center, zoom: 4.6, pitch: PITCH_3D, duration: 1200, essential: true });    $('viewToggleBtn').textContent = '俯视';
+  }
+  // 切换左侧列表
+  if (isPoem) {
+    updatePoems(cur);
+  } else {
+    // 清除诗词标记和气泡
+    const _po = document.getElementById('poem-overlay');
+    if (_po) _po.remove();
+    _poemPopup = null;
+    poemTextEls.forEach(el => el.remove());
+    textEls = textEls.filter(el => el.dataset.type !== 'poem');
+    poemTextEls = [];
+    updateEventList(cur);
+    $('eventList').querySelector('.event-list-header-text').style.display = '';
+  }
+  // 更新时间轴 hover/click 提示
+  updateTimelineUI();
+}
+
+/* ============================ 搜索 ============================ */
+
+// 教材册次：7A→七上, 7B→七下, 8A→八上
+function cebookOf(id) {
+  const p = (id || '').split('-')[0];
+  return p === '7A' ? '七上' : p === '7B' ? '七下' : p === '8A' ? '八上' : p;
+}
+function unitOf(id) {
+  const seg = (id || '').split('-');
+  return seg[1] ? '第' + parseInt(seg[1], 10) + '单元' : '';
+}
+// 按年份就近查找断面下标
+function snapForYear(y) {
+  const yrs = SNAPSHOTS.map(s => s.year);
+  if (y <= yrs[0]) return 0;
+  if (y >= yrs[yrs.length - 1]) return yrs.length - 1;
+  let lo = 0, hi = yrs.length - 1;
+  while (lo < hi) {
+    const mid = (lo + hi) >> 1;
+    if (yrs[mid] < y) lo = mid + 1; else hi = mid;
+  }
+  if (lo > 0 && (y - yrs[lo - 1] <= yrs[lo] - y)) lo = lo - 1;
+  return lo;
+}
+
+let SEARCH_INDEX = [];
+function buildSearchIndex() {
+  SEARCH_INDEX = [];
+  // 事件（含人物：描述文本一并纳入可搜索范围）
+  (window._eventsData || []).forEach(ev => {
+    const sub = [cebookOf(ev.id), unitOf(ev.id)].filter(Boolean).join(' · ');
+    SEARCH_INDEX.push({
+      type: 'event', label: ev.event, sub: sub,
+      text: (ev.event + ev.dynasty + ev.period + ev.location + ev.province + (ev.description || '')),
+      snap: snapForYear(ev.time_year), ev: ev
+    });
+  });
+  // 政权 + 都城（跨断面去重，保留最早出现的断面）
+  const seenR = new Set(), seenC = new Set();
+  SNAPSHOTS.forEach((s, i) => {
+    s.regimes.forEach(r => {
+      if (r.name && !seenR.has(r.name)) {
+        seenR.add(r.name);
+        SEARCH_INDEX.push({ type: 'regime', label: r.name,
+          sub: yearText(s.year) + ' · ' + s.era,
+          text: r.name + (r.capital || ''), snap: i, regime: r });
+      }
+      if (r.capital && !seenC.has(r.capital)) {
+        seenC.add(r.capital);
+        SEARCH_INDEX.push({ type: 'capital', label: r.capital,
+          sub: r.name + ' 都城', text: r.capital + r.name, snap: i, regime: r });
+      }
+    });
+  });
+}
+
+function runSearch(q, mode) {
+  q = (q || '').trim().toLowerCase();
+  if (!q) return [];
+  // 诗词模式下搜索诗词
+  if (mode === 'poem') {
+    const hits = [];
+    for (const p of POEM_DATA) {
+      const searchText = (p.t + p.a + p.d + p.c + p.g + (p.f || p.l)).toLowerCase();
+      if (searchText.indexOf(q) >= 0) {
+        hits.push({ type: 'poem', label: p.t, sub: p.a + ' · ' + p.d + ' · ' + p.c, data: p });
+      }
+    }
+    return hits.slice(0, 14);
+  }
+  // 疆域模式：搜索历史事件/政权/都城
+  const nameHits = [], textHits = [];
+  SEARCH_INDEX.forEach(item => {
+    if (item.label.toLowerCase().indexOf(q) >= 0) nameHits.push(item);
+    else if (item.text.toLowerCase().indexOf(q) >= 0) textHits.push(item);
+  });
+  return nameHits.concat(textHits).slice(0, 14);
+}
+
+const TAG_TEXT = { event: '事件', regime: '政权', capital: '都城', poem: '诗词' };
+function renderSearchResults(list) {
+  const box = $('searchResults');
+  if (!box) return;
+  if (!list.length) {
+    box.innerHTML = '<div class="sr-empty">没有找到相关结果</div>';
+    box.classList.remove('hidden');
+    return;
+  }
+  box.innerHTML = list.map((it, i) =>
+    '<div class="sr-item" data-i="' + i + '">' +
+      '<span class="sr-tag ' + it.type + '">' + TAG_TEXT[it.type] + '</span>' +
+      '<span class="sr-label">' + it.label + '</span>' +
+      '<span class="sr-sub">' + (it.sub || '') + '</span>' +
+    '</div>'
+  ).join('');
+  box.classList.remove('hidden');
+  window._searchList = list;
+}
+function hideSearch() {
+  const box = $('searchResults');
+  if (box) box.classList.add('hidden');
+}
+function gotoSearchResult(item) {
+  hideSearch();
+  if (item.type === 'poem') {
+    const p = item.data;
+    // 找到诗词所在朝代的断面
+    const era = p.e || '';
+    let snapIdx = 0;
+    for (let i = 0; i < SNAPSHOTS.length; i++) {
+      if (SNAPSHOTS[i].era === era) { snapIdx = i; break; }
+    }
+    applySnapshot(snapIdx, true);
+    if (window._mode !== 'poem') switchMode('poem');
+    map.flyTo({ center: [p.lng, p.lat], zoom: 5, pitch: PITCH_3D, duration: 1200 });
+    $('viewToggleBtn').textContent = '俯视';
+    showPoemPopup(p);
+    return;
+  }
+  // 切换到疆域模式
+  if (window._mode === 'poem') switchMode('history');
+  pause();
+  applySnapshot(item.snap, true);
+  if (item.type === 'event') {
+    const ev = item.ev;
+    map.flyTo({ center: [ev.lng, ev.lat], zoom: Math.max(map.getZoom(), 5), pitch: PITCH_3D, duration: 1200 });
+    $('viewToggleBtn').textContent = '俯视';
+    showEventCard({
+      id: ev.id, name: ev.event, year: ev.time_year, dynasty: ev.dynasty,
+      period: ev.period, location: ev.location, province: ev.province,
+      desc: ev.description, lng: ev.lng, lat: ev.lat
+    });
+  } else {
+    const r = item.regime;
+    const center = r.label || r.capCoord || HOME.center;
+    map.flyTo({ center: center, zoom: 4.2, pitch: 0, bearing: 0, duration: 1200 });
+    $('viewToggleBtn').textContent = '3D';
+    const prov = r.provinces && r.provinces.length ? normProv(r.provinces[0]) : null;
+    if (prov) map.once('moveend', () => showCard(prov));
+  }
+}
+
+
 
 /* ============================ 着色与动画 ============================ */
 
@@ -7457,6 +7921,7 @@ function applySnapshot(pi, instant) {
   updateEventList(pi);
   updateTimelineUI();
   renderDynamicLabels(pi);
+  if (window._mode === 'poem') { updatePoems(pi); requestAnimationFrame(positionAllText); }
 }
 
 /* ============================ 政权标注 ============================ */
@@ -7650,7 +8115,17 @@ function buildEraButtons() {
     const btn = document.createElement('button');
     btn.textContent = era.name;
     btn.dataset.idx = era.first;
-    btn.addEventListener('click', () => { pause(); hideCard(); map.flyTo({ ...HOME, duration: 1200 }); $('viewToggleBtn').textContent = '3D'; applySnapshot(era.first); });
+    btn.addEventListener('click', () => {
+      pause(); hideCard();
+      if (window._mode === 'poem') {
+        map.flyTo({ center: HOME.center, zoom: 4.6, pitch: PITCH_3D, duration: 1200 });
+        $('viewToggleBtn').textContent = '俯视';
+      } else {
+        map.flyTo({ ...HOME, duration: 1200 });
+        $('viewToggleBtn').textContent = '3D';
+      }
+      applySnapshot(era.first);
+    });
     bar.appendChild(btn);
   });
 }
@@ -7833,11 +8308,21 @@ function createTextEl(lng, lat, text, cls) {
 }
 
 function positionAllText() {
+  const canvasH = map.getCanvas().height;
+  const zoomFactor = Math.pow(1.35, map.getZoom() - HOME.zoom); // zoom4=1x, zoom5=1.35x, zoom6=1.82x...
   textEls.forEach(el => {
     try {
       const p = map.project([+el.dataset.lng, +el.dataset.lat]);
       if (!p || !isFinite(p.x)) return;
-      el.style.transform = `translate(${p.x}px, ${p.y}px) translate(-50%, -50%)`;
+      // 诗词名称：透视缩放 + 随地图缩放自适应
+      if (el.dataset.type === 'poem') {
+        const normY = Math.max(0, Math.min(1, p.y / canvasH));
+        const perspective = 0.2 + normY * 1.6; // 顶部0.2x → 底部1.8x，中间1.0x
+        const totalScale = perspective * zoomFactor;
+        el.style.transform = `translate(${p.x}px, ${p.y}px) translate(-50%, -50%) scale(${totalScale})`;
+      } else {
+        el.style.transform = `translate(${p.x}px, ${p.y}px) translate(-50%, -50%)`;
+      }
     } catch(e) { /* 地图投影尚未就绪，等待下一帧 */ }
   });
   eventPinEls.forEach(el => {
@@ -7862,7 +8347,29 @@ function scheduleTextReposition() {
     _rafPending = true;
     requestAnimationFrame(() => {
       _rafPending = false;
-      positionAllText();
+      if (window._mode === 'poem') {
+        // 诗词模式：只更新诗词和城市位置
+        const canvasH = map.getCanvas().height;
+        const zoomFactor = Math.pow(1.35, map.getZoom() - HOME.zoom);
+        textEls.forEach(el => {
+          const t = el.dataset.type;
+          if (t !== 'poem' && t !== 'city') return;
+          try {
+            const p = map.project([+el.dataset.lng, +el.dataset.lat]);
+            if (!p || !isFinite(p.x)) return;
+            if (t === 'poem') {
+              const normY = Math.max(0, Math.min(1, p.y / canvasH));
+              const perspective = 0.2 + normY * 1.6;
+              el.style.transform = `translate(${p.x}px, ${p.y}px) translate(-50%, -50%) scale(${perspective * zoomFactor})`;
+            } else {
+              el.style.transform = `translate(${p.x}px, ${p.y}px) translate(-50%, -50%)`;
+            }
+          } catch(e) {}
+        });
+      } else {
+        // 历史模式：全部实时更新
+        positionAllText();
+      }
     });
   };
 
@@ -7912,6 +8419,14 @@ function renderDynamicLabels(pi) {
   });
   positionAllText();
   scheduleTextReposition(); // 确保重定位循环在切换朝代后继续运行
+  // 诗踪模式下隐藏政权/都城标注
+  if (window._mode === 'poem') {
+    textEls.forEach(el => {
+      if (el.dataset.type === 'regime' || el.dataset.type === 'capital') {
+        el.style.display = 'none';
+      }
+    });
+  }
 }
 
 /* ============================ 地图初始化 ============================ */
@@ -7972,8 +8487,6 @@ async function init() {
   });
 
   map.addControl(new maplibregl.NavigationControl({ visualizePitch: true, showZoom: true, showCompass: false }), 'top-right');
-  map.addControl(new maplibregl.ScaleControl({ unit: 'metric' }), 'bottom-left');
-  map.addControl(new maplibregl.AttributionControl({ compact: true }), 'bottom-right');
 
   // 使用 style.load（不等瓦片）代替 load 事件，更可靠
   let _initDone = false;
@@ -7984,6 +8497,7 @@ async function init() {
     const ctrl = document.querySelector('.maplibregl-ctrl-top-right .maplibregl-ctrl-group');
     if (ctrl) { ctrl.appendChild($('viewToggleBtn')); ctrl.appendChild($('resetBtn')); }
     onMapLoad();
+    window._mode = 'history';
     bindUI();
   };
   map.on('style.load', startInit);
@@ -8166,6 +8680,7 @@ function onMapLoad() {
   });
 
   map.on('click', 'china-fill', e => {
+    if (window._mode === 'poem') return;
     if (e.features.length > 0) {
       const name = e.features[0].properties.name;
       pinnedProv = name;
@@ -8174,7 +8689,8 @@ function onMapLoad() {
     }
   });
   map.on('mousemove', 'china-fill', e => {
-    if (window._interacting) return; // 交互期间跳过，避免频繁 setFilter 阻塞主线程
+    if (window._mode === 'poem') return;
+    if (window._interacting) return;
     if (e.features.length > 0) {
       const name = e.features[0].properties.name;
       map.getCanvas().style.cursor = 'pointer';
@@ -8185,12 +8701,14 @@ function onMapLoad() {
     }
   });
   map.on('mouseleave', 'china-fill', () => {
+    if (window._mode === 'poem') return;
     map.getCanvas().style.cursor = '';
     hoveredProv = null;
     map.setFilter('hover-line', ['==', ['get', 'name'], '']);
   });
   // 境外领土悬停高亮
   map.on('mousemove', 'ext-fill', e => {
+    if (window._mode === 'poem') return;
     if (e.features.length > 0) {
       const name = e.features[0].properties.name;
       map.getCanvas().style.cursor = 'pointer';
@@ -8201,11 +8719,13 @@ function onMapLoad() {
     }
   });
   map.on('mouseleave', 'ext-fill', () => {
+    if (window._mode === 'poem') return;
     map.getCanvas().style.cursor = '';
     hoveredProv = null;
     map.setFilter('hover-line', ['==', ['get', 'name'], '']);
   });
   map.on('click', 'regime-label', e => {
+    if (window._mode === 'poem') return;
     if (e.features.length > 0) {
       const f = e.features[0];
       const provs = f.properties.provs || '';
@@ -8217,6 +8737,7 @@ function onMapLoad() {
 
   // 外部领土点击
   map.on('click', 'ext-fill', e => {
+    if (window._mode === 'poem') return;
     if (e.features.length > 0) {
       const name = e.features[0].properties.name;
       pinnedProv = name;
@@ -8251,6 +8772,7 @@ function onMapLoad() {
   }
   // 关联地区鼠标移入：改变光标 + 高亮边界
   map.on('mousemove', 'related-fill', e => {
+    if (window._mode === 'poem') return;
     if (e.features.length > 0) {
       const name = e.features[0].properties.name;
       map.getCanvas().style.cursor = 'pointer';
@@ -8261,12 +8783,14 @@ function onMapLoad() {
     }
   });
   map.on('mouseleave', 'related-fill', () => {
+    if (window._mode === 'poem') return;
     map.getCanvas().style.cursor = '';
     hoveredProv = null;
     map.setFilter('hover-line', ['==', ['get', 'name'], '']);
   });
   // 关联地区点击
   map.on('click', 'related-fill', e => {
+    if (window._mode === 'poem') return;
     if (e.features.length > 0) {
       const name = e.features[0].properties.name;
       const center = e.lngLat;
@@ -8280,6 +8804,7 @@ function onMapLoad() {
 
   // 城市标记点击
   map.on('click', 'city-circle', e => {
+    if (window._mode === 'poem') return;
     if (e.features.length > 0) {
       const f = e.features[0].properties;
       flyToFeature(e);
@@ -8287,16 +8812,20 @@ function onMapLoad() {
     }
   });
   map.on('mousemove', 'city-circle', e => {
+    if (window._mode === 'poem') return;
     map.getCanvas().style.cursor = 'pointer';
   });
   map.on('mouseleave', 'city-circle', () => {
+    if (window._mode === 'poem') return;
     map.getCanvas().style.cursor = '';
   });
 
-  // 点击地图空白处关闭弹窗（事件标记已 stopPropagation，不会被触发）
+  // 点击地图空白处关闭弹窗
   map.on('click', e => {
     const f = map.queryRenderedFeatures(e.point, { layers: ['china-fill', 'regime-label', 'city-circle', 'ext-fill', 'related-fill'] });
     if (f.length === 0) hideCard();
+    const _po = document.getElementById('poem-overlay');
+    if (_po) { _po.remove(); _poemPopup = null; }
   });
 
   // 全部完成，隐藏加载提示
@@ -8373,6 +8902,11 @@ function bindUI() {
     $('eventList').classList.toggle('collapsed');
   });
 
+  // 模式切换
+  document.querySelectorAll('.mode-btn').forEach(btn => {
+    btn.addEventListener('click', () => switchMode(btn.dataset.mode));
+  });
+
   // 键盘快捷键
   document.addEventListener('keydown', e => {
     if (e.target.tagName === 'INPUT') return;
@@ -8381,6 +8915,32 @@ function bindUI() {
     else if (e.code === 'ArrowRight') { pause(); applySnapshot(Math.min(SNAPSHOTS.length - 1, cur + 1)); }
     else if (e.code === 'Escape') { hideCard(); }
   });
+
+  // 搜索框
+  const searchInput = $('searchInput');
+  if (searchInput) {
+    searchInput.addEventListener('input', e => {
+      const list = runSearch(e.target.value, window._mode);
+      if (!e.target.value.trim()) { hideSearch(); return; }
+      renderSearchResults(list);
+    });
+    searchInput.addEventListener('keydown', e => {
+      if (e.key === 'Escape') { hideSearch(); searchInput.blur(); }
+    });
+    const results = $('searchResults');
+    if (results) results.addEventListener('click', e => {
+      const item = e.target.closest('.sr-item');
+      if (!item) return;
+      const idx = parseInt(item.dataset.i, 10);
+      const list = window._searchList || [];
+      if (list[idx]) gotoSearchResult(list[idx]);
+    });
+    // 点击其它区域收起结果
+    document.addEventListener('click', e => {
+      if (!$('searchBox').contains(e.target)) hideSearch();
+    });
+  }
+
 
   // 隐藏提示
   setTimeout(() => { const h = $('hint'); if (h) h.style.opacity = '0'; }, 6000);
