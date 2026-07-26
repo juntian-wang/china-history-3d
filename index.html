@@ -5,6 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>中国历史疆域 3D 地形图</title>
     <meta http-equiv="refresh" content="0;url=maplibre_3d_history.html">
+    <script>
+        // 保留查询参数（?mode=poem 等）传递给主页面
+        var search = window.location.search;
+        if (search) {
+            document.querySelector('meta[http-equiv="refresh"]').setAttribute('content', '0;url=maplibre_3d_history.html' + search);
+        }
+    </script>
     <style>
         body {
             margin: 0;

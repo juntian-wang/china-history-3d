@@ -7669,6 +7669,23 @@ function showPoemPopup(p) {
   });
 }
 
+/* ============================ 自动旋转 ============================ */
+let _autoRotateId = null;
+
+function startAutoRotate() {
+  stopAutoRotate();
+  const step = () => {
+    if (map && !window._interacting) {
+      map.rotateTo(map.getBearing() + 0.02, { duration: 0, easing: () => 1 });
+    }
+    _autoRotateId = requestAnimationFrame(step);
+  };
+  _autoRotateId = requestAnimationFrame(step);
+}
+function stopAutoRotate() {
+  if (_autoRotateId) { cancelAnimationFrame(_autoRotateId); _autoRotateId = null; }
+}
+
 // 模式切换
 function switchMode(mode) {
   window._mode = mode;
@@ -7722,6 +7739,8 @@ function switchMode(mode) {
   }
   // 更新时间轴 hover/click 提示
   updateTimelineUI();
+  // 诗词模式自动旋转
+  if (mode === 'poem') { startAutoRotate(); } else { stopAutoRotate(); }
 }
 
 /* ============================ 搜索 ============================ */
@@ -8681,6 +8700,8 @@ function onMapLoad() {
     window._interacting = false;
     positionAllText();
   });
+  // 用户拖拽地图时暂停自动旋转
+  map.on('dragstart', stopAutoRotate);
 
   map.on('click', 'china-fill', e => {
     if (window._mode === 'poem') return;
@@ -8835,23 +8856,38 @@ function onMapLoad() {
   window._mapLoaded = true;
   $('loader').classList.add('hidden');
 
-  // 开场云雾散开，露出中原大地
-  const _oc = $('openingClouds');
-  if (_oc) {
-    // 开场期间隐藏常驻云层（9朵带blur的CSS动画元素），释放GPU给开场动画
-    // 使用 opacity 而非 display:none —— CSS动画持续运行，恢复时无重排延迟
-    const _cl = $('cloudLayer');
-    if (_cl) _cl.classList.add('cloud-hidden');
-    // 双 rAF：等地图渲染完一帧再启动，避免首帧卡顿
-    requestAnimationFrame(() => {
+  // URL 参数：?mode=poem → 跳过开场，直接进入诗词模式（唐朝）
+  const _urlMode = new URLSearchParams(location.search).get('mode');
+  if (_urlMode === 'poem') {
+    const _tang = ERAS.find(e => e.name === '唐');
+    if (_tang) {
+      // 跳过开场动画
+      const _oc2 = $('openingClouds');
+      if (_oc2) { _oc2.classList.add('done'); _oc2.style.display = 'none'; }
+      const _cl2 = $('cloudLayer');
+      if (_cl2) _cl2.classList.remove('cloud-hidden');
+      // 立即切换
+      requestAnimationFrame(() => { applySnapshot(_tang.first, true); switchMode('poem'); });
+    }
+  } else {
+    // 开场云雾散开，露出中原大地
+    const _oc = $('openingClouds');
+    if (_oc) {
+      // 开场期间隐藏常驻云层（9朵带blur的CSS动画元素），释放GPU给开场动画
+      // 使用 opacity 而非 display:none —— CSS动画持续运行，恢复时无重排延迟
+      const _cl = $('cloudLayer');
+      if (_cl) _cl.classList.add('cloud-hidden');
+      // 双 rAF：等地图渲染完一帧再启动，避免首帧卡顿
       requestAnimationFrame(() => {
-        _oc.classList.add('parting');
-        // 开场动画尾声（约3.5s）开始淡入常驻云层，与开场云雾淡出无缝衔接
-        setTimeout(() => { if (_cl) _cl.classList.remove('cloud-hidden'); }, 3500);
-        // 开场完全结束后移除开场层
-        setTimeout(() => _oc.classList.add('done'), 4800);
+        requestAnimationFrame(() => {
+          _oc.classList.add('parting');
+          // 开场动画尾声（约3.5s）开始淡入常驻云层，与开场云雾淡出无缝衔接
+          setTimeout(() => { if (_cl) _cl.classList.remove('cloud-hidden'); }, 3500);
+          // 开场完全结束后移除开场层
+          setTimeout(() => _oc.classList.add('done'), 4800);
+        });
       });
-    });
+    }
   }
 
   } catch(e) {
