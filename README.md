@@ -280,8 +280,8 @@ Docker 镜像基于 `nginx:alpine`，将 HTML、event_images 和 website 目录�
 
 | 链接 | 说明 |
 |------|------|
-| 🔗 **https://map.jonlab.cn** | 自定义域名 |
-| 🔗 https://jonlib.top | 旧域名（自动跳转到 map.jonlab.cn） |
+| 🔗 **https://history.jonlab.cn** | 自定义域名 |
+| 🔗 https://jonlib.top | 旧域名（自动跳转到 history.jonlab.cn） |
 | 🔗 https://juntian-wang.github.io/china-history-3d/ | GitHub Pages 原始地址 |
 
 ### 部署历史
@@ -295,7 +295,7 @@ Docker 镜像基于 `nginx:alpine`，将 HTML、event_images 和 website 目录�
 | 2026-07-08 | SSL 证书签发 | Let's Encrypt 证书为 `jonlib.top` 签发成功 |
 | 2026-07-08 | www 子域名配置 | 阿里云 DNS 添加 www CNAME 到 `juntian-wang.github.io` |
 | 2026-07-13 | 境外疆域 & 关联地区 | 推送蒙古/朝鲜着色、8个关联地区简介卡片、统一国界线、朝代栏横滚修复 |
-| 2026-07-26 | 更换域名 | 改用 `map.jonlab.cn`，`jonlib.top` 设为跳转 |
+| 2026-07-26 | 更换域名 | 改用 `history.jonlab.cn`，`jonlib.top` 设为跳转 |
 
 > **备注**：因 sandbox 网络限制，git push 推送大文件时不稳定，改用 GitHub API（Git Data API + Contents API）完成代码推送。
 
@@ -313,10 +313,10 @@ Docker 镜像基于 `nginx:alpine`，将 HTML、event_images 和 website 目录�
 
 **CNAME 记录**（二级域名）：
 ```
-map → juntian-wang.github.io
+history → juntian-wang.github.io
 ```
 
-> 当前网站使用 `map.jonlab.cn` 作为主域名，`jonlib.top` 设置 URL 转发跳转到 `map.jonlab.cn`。
+> 当前网站使用 `history.jonlab.cn` 作为主域名
 
 ---
 
