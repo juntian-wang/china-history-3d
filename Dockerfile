@@ -8,6 +8,8 @@ COPY deploy/nginx/history-map.conf /etc/nginx/conf.d/
 
 # 复制网站文件
 COPY maplibre_3d_history.html /usr/share/nginx/html/
+COPY maplibre-gl.js /usr/share/nginx/html/
+COPY maplibre-gl.css /usr/share/nginx/html/
 COPY event_images /usr/share/nginx/html/event_images
 COPY website /usr/share/nginx/html/website
 
