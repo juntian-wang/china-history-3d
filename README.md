@@ -296,6 +296,7 @@ Docker 镜像基于 `nginx:alpine`，将 HTML、event_images 和 website 目录�
 | 2026-07-08 | www 子域名配置 | 阿里云 DNS 添加 www CNAME 到 `juntian-wang.github.io` |
 | 2026-07-13 | 境外疆域 & 关联地区 | 推送蒙古/朝鲜着色、8个关联地区简介卡片、统一国界线、朝代栏横滚修复 |
 | 2026-07-26 | 更换域名 | 改用 `history.jonlab.cn`，`jonlib.top` 设为跳转 |
+| 2026-07-28 | 迁移至阿里云新加坡 | Docker 部署，Let's Encrypt HTTPS，域名指向服务器 IP |
 
 > **备注**：因 sandbox 网络限制，git push 推送大文件时不稳定，改用 GitHub API（Git Data API + Contents API）完成代码推送。
 
