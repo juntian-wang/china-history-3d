@@ -6,8 +6,7 @@ __pycache__/
 backup/
 output/
 
-# 部署配置自身
-deploy/
+# Docker 构建文件（不含 deploy 目录，其中包含 Nginx 配置）
 Dockerfile
 docker-compose.yml
 .dockerignore
