@@ -107,9 +107,9 @@ project/
 
 ---
 
-## 本地运行
+## 部署
 
-### 方式一：直接双击打开（推荐）
+### 方案一：直接双击打开（推荐本地开发）
 
 `maplibre_3d_history.html` 已将所有疆域和底图数据内嵌，**无需 HTTP 服务器**：
 
@@ -117,51 +117,62 @@ project/
 2. 浏览器会自动打开，地图即可正常显示
 3. 事件图片（`event_images/` 目录）需要和 HTML 在同一目录下
 
-### 方式二：Python HTTP Server
+### 方案二：本地 HTTP 服务器
 
 ```bash
 cd /path/to/project
 python3 -m http.server 8780
+# 或
+npx serve -p 8780
 ```
 
 浏览器访问：**http://localhost:8780/maplibre_3d_history.html**
 
-### 方式三：其他静态服务器
+### 方案三：部署到阿里云 ECS（当前线上方案）
 
+网站运行在阿里云新加坡 ECS，宿主机 Nginx 直接托管静态文件，**不再使用 Docker**。
+
+**服务器信息**：
+- IP：`47.236.92.136`
+- 系统：Ubuntu 24.04
+- 域名：`history.jonlab.cn`（A 记录指向该 IP）
+- 网站根目录：`/var/www/history/`
+
+**首次部署或更新**：
 ```bash
-# Node.js
-npx serve -p 8780
-
-# PHP
-php -S localhost:8780
+cd /path/to/project
+# 打包项目文件
+tar czf site.tar.gz maplibre_3d_history.html maplibre-gl.js maplibre-gl.css index.html event_images/ website/
+# 上传到服务器
+scp site.tar.gz root@47.236.92.136:/root/
+# SSH 到服务器解压
+ssh root@47.236.92.136
+tar xzf /root/site.tar.gz -C /var/www/history/
+rm -f /root/site.tar.gz
+# 重启 Nginx 使生效
+systemctl reload nginx
 ```
 
----
+**Nginx 配置位置**：`/etc/nginx/sites-available/default`
+- `history.jonlab.cn` → 根目录 `/var/www/history`
+- `jonlab.cn` + `www.jonlab.cn` → 个人官网 `/var/www/jonlab`
 
-## Docker 部署
+**SSL 证书**：Let's Encrypt（certbot 自动续期）
+- 证书路径：`/etc/letsencrypt/live/jonlab.cn/`
+- 覆盖域名：`jonlab.cn`、`www.jonlab.cn`、`history.jonlab.cn`
+- HTTP 自动 301 跳转 HTTPS
+
+### 方案四：Docker 部署（备选/历史）
+
+项目附带 Dockerfile 和 docker-compose.yml，可在本地或服务器用 Docker 启动：
 
 ```bash
 cd /path/to/project
-
-# 构建并启动
 docker compose up -d --build
-
 # 访问 http://localhost/
-
-# 停止
-docker compose down
 ```
 
-Docker 镜像基于 `nginx:alpine`，将 HTML、event_images 和 website 目录复制到容器内，包含健康检查和自动重启策略。
-
-### 部署到云服务器
-
-1. 购买轻量应用服务器（腾讯云、阿里云等），选择中国香港 / 新加坡节点可免备案
-2. 安全组/防火墙放行 80 端口
-3. 安装 Docker 和 Docker Compose
-4. 上传整个项目目录到服务器
-5. 执行 `docker compose up -d --build`
-6. 通过 `http://<服务器IP>/` 访问
+> Docker 方案曾是线上运行方式（2026-07-28），后续改为宿主机 Nginx 直接托管。
 
 ---
 
@@ -276,13 +287,12 @@ Docker 镜像基于 `nginx:alpine`，将 HTML、event_images 和 website 目录�
 
 ## 在线访问
 
-本网站已部署到 GitHub Pages，可通过以下链接访问：
+本网站已部署到阿里云新加坡 ECS，可通过以下链接访问：
 
 | 链接 | 说明 |
 |------|------|
-| 🔗 **https://history.jonlab.cn** | 自定义域名 |
-| 🔗 https://jonlib.top | 旧域名（自动跳转到 history.jonlab.cn） |
-| 🔗 https://juntian-wang.github.io/china-history-3d/ | GitHub Pages 原始地址 |
+| 🔗 **https://history.jonlab.cn** | 主域名（阿里云新加坡） |
+| 🔗 https://jonlib.top | 旧域名（跳转到 history.jonlab.cn） |
 
 ### 部署历史
 
@@ -296,7 +306,7 @@ Docker 镜像基于 `nginx:alpine`，将 HTML、event_images 和 website 目录�
 | 2026-07-08 | www 子域名配置 | 阿里云 DNS 添加 www CNAME 到 `juntian-wang.github.io` |
 | 2026-07-13 | 境外疆域 & 关联地区 | 推送蒙古/朝鲜着色、8个关联地区简介卡片、统一国界线、朝代栏横滚修复 |
 | 2026-07-26 | 更换域名 | 改用 `history.jonlab.cn`，`jonlib.top` 设为跳转 |
-| 2026-07-28 | 迁移至阿里云新加坡 | Docker 部署，Let's Encrypt HTTPS，域名指向服务器 IP |
+| 2026-07-29 | 切换为宿主机 Nginx | 停止 Docker，改为 Nginx 直接托管，统一管理 jonlab.cn 个人站和 history 地图站 |
 
 > **备注**：因 sandbox 网络限制，git push 推送大文件时不稳定，改用 GitHub API（Git Data API + Contents API）完成代码推送。
 
@@ -304,20 +314,12 @@ Docker 镜像基于 `nginx:alpine`，将 HTML、event_images 和 website 目录�
 
 如需在其他域名上部署，DNS 需添加以下记录：
 
-**A 记录**（根域名，指向 GitHub Pages 服务器）：
+**A 记录**（指向阿里云新加坡服务器）：
 ```
-@ → 185.199.108.153
-@ → 185.199.109.153
-@ → 185.199.110.153
-@ → 185.199.111.153
+history → 47.236.92.136
 ```
 
-**CNAME 记录**（二级域名）：
-```
-history → juntian-wang.github.io
-```
-
-> 当前网站使用 `history.jonlab.cn` 作为主域名
+> 当前网站运行在阿里云新加坡 ECS，域名 `history.jonlab.cn`。`jonlab.cn` 和 `www.jonlab.cn` 为个人官网。
 
 ---
 
